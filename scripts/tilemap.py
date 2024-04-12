@@ -1,8 +1,8 @@
 import pygame
 
-NEIGHBOR_OFFSET = [(-50, -50), (-50, 0), (-50, 50),
-                   (0, -50), (0, 0), (0, 50),
-                   (50, -50), (50, 0), (50, 50)]
+NEIGHBOR_OFFSET = [(-1, -1), (-1, 0), (-1, 1),
+                   (0, -1), (0, 0), (0, 1),
+                   (1, -1), (1, 0), (1, 1)]
 PHYSICS_TILES = {'grass_top', 'stone'}
 
 
@@ -14,12 +14,13 @@ class Tilemap:
     self.offgrid = []
 
     for i in range(10):
-      self.tilemap[str(i+1) + ';10'] = {'type': 'grass_top', 'pos': (1 + i, 10)}
       self.tilemap['5;' + str(i+1)] = {'type': 'stone', 'pos': (5, 1 + i)}
+      self.tilemap[str(i+1) + ';10'] = {'type': 'grass_top', 'pos': (1 + i, 10)}
+
 
   def tiles_around(self, pos):
     tiles = []
-    tile_loc = (int(pos[0] // self.size), int(pos[1] // self.size))
+    tile_loc = (pos[0] // self.size, pos[1] // self.size)
     for offset in NEIGHBOR_OFFSET:
       check_loc = str(tile_loc[0] + offset[0]) + ";" + str(tile_loc[1] + offset[1])
       if check_loc in self.tilemap:
