@@ -1,20 +1,23 @@
 import pygame
 
-NEIGHBOR_OFFSET = [(-1, -1), (-1, 0), (-1, 1),
-                   (0, -1), (0, 0), (0, 1),
-                   (1, -1), (1, 0), (1, 1)]
+NEIGHBOR_OFFSET = [ (-2, -2), (-2, -1), (-2, 0), (-2, 1), (-2, 2),
+                    (-1, -2), (-1, -1), (-1, 0), (-1, 1), (-1, 2),
+                    (0, -2), (0, -1), (0, 0), (0, 1), (0, 2),
+                    (1, -2), (1, -1), (1, 0), (1, 1), (1, 2),
+                    (2, -2), (2, -1), (2, 0),  (2, 1), (2, 2)]
 PHYSICS_TILES = {'grass_top', 'stone'}
 
 
 class Tilemap:
   def __init__(self, game, size=50):
+
     self.game = game
     self.size = size
     self.tilemap = {}
     self.offgrid = []
 
-    for i in range(10):
-      self.tilemap['5;' + str(i+1)] = {'type': 'stone', 'pos': (5, 1 + i)}
+    for i in range(50):
+      # self.tilemap['5;' + str(i+1)] = {'type': 'stone', 'pos': (5, 1 + i)}
       self.tilemap[str(i+1) + ';10'] = {'type': 'grass_top', 'pos': (1 + i, 10)}
 
 
@@ -34,10 +37,15 @@ class Tilemap:
         rects.append(pygame.Rect(tile['pos'][0] * self.size, tile['pos'][1] * self.size, self.size, self.size))
     return rects
 
-  def render(self, surf):
-    for tile in self.offgrid:
-      surf.blit(self.game.assets[tile['type']][tile['variant']], tile['pos'])
+  def render(self, surf, offset = (0, 0)):
+    for x in range(int(offset[0]//self.size), int((offset[0] + surf.get_width())//self.size +1)):
+      for y in range(int(offset[1]//self.size), int((offset[1] + surf.get_height())//self.size +1)):
+        loc = str(x) + ';' + str(y)
+        if loc in self.tilemap:
+          print(loc)
+          tile = self.tilemap[loc]
+          surf.blit(self.game.assets[tile['type']], (tile['pos'][0]*self.size - offset[0], tile['pos'][1]*self.size - offset[1]))
 
-    for loc in self.tilemap:
-      tile = self.tilemap[loc]
-      surf.blit(self.game.assets[tile['type']], (tile['pos'][0]*self.size, tile['pos'][1]*self.size))
+    # for loc in self.tilemap:
+    #   tile = self.tilemap[loc]
+    #   surf.blit(self.game.assets[tile['type']], (tile['pos'][0]*self.size - offset[0], tile['pos'][1]*self.size - offset[1]))
