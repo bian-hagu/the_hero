@@ -14,8 +14,7 @@ class Game:
     self.clock = pygame.time.Clock()
     self.movement = [False, False]
     self.assets = {
-      'grass_top': load_img('tiles/grass_top.png'), 
-      'stone': load_img('tiles/stone.png'),
+      'grass': load_imgs('tiles/grass'), 
       'background': load_img('background/background.png', (1280,720)),
       'player/idle': Animation(load_imgs('entities/hero/hero_idle'), duration=4), 
       'player/jump_up': Animation(load_imgs('entities/hero/hero_jump_up'), duration = 3),
