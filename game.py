@@ -16,6 +16,7 @@ class Game:
     self.assets = {
       'grass': load_imgs('tiles/grass'), 
       'background': load_img('background/background.png', (1280,720)),
+      'background1': load_img('background/bg.png', (1280,720)),
       'player/idle': Animation(load_imgs('entities/hero/hero_idle'), duration=4), 
       'player/jump_up': Animation(load_imgs('entities/hero/hero_jump_up'), duration = 3),
       'player/jump_down': Animation(load_imgs('entities/hero/hero_jump_down'), duration = 3),
@@ -25,13 +26,19 @@ class Game:
     self.player = Player(self, (50, 450), (50, 50))
     self.tilemap = Tilemap(self, size=50)
     self.scroll = [0,0]
+    try:
+      self.tilemap.load('map.json')
+    except:
 
+      # raise FileNotFoundError('Map file not found')
+      pass
   def run(self):  
     while True:
       self.display.blit(self.assets['background'], (0,0))
       if self.player.pos[0] > self.display.get_width()/2:
         self.scroll[0] += (self.player.rect().centerx - self.display.get_width()/2 - self.scroll[0])
-      self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])
+      if self.player.pos[1] < 300:
+        self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])
       
       render_scroll = ((self.scroll[0], (self.scroll[1])))    
       self.tilemap.render(self.display, offset=render_scroll)
@@ -60,7 +67,7 @@ class Game:
           if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
             self.movement[1] = False
       if keys[pygame.K_SPACE] and self.player.collision['bottom']:
-        self.player.velocity[1] = -20 #height of jump = 4 blocks
+        self.player.velocity[1] = -15 #height of jump = 4 blocks
 
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()

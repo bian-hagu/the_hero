@@ -11,7 +11,14 @@ PHYSICS_TILES = {'grass', 'stone'}
 
 class Tilemap:
   def __init__(self, game, size=50):
+    """
+    Initializes a new Tilemap object.
 
+    Parameters
+    ----------
+      game (Game): The game instance this tilemap belongs to.
+      size (int, optional): The size of each tile in pixels. Defaults to 50.
+    """
     self.game = game
     self.size = size
     self.tilemap = {}
