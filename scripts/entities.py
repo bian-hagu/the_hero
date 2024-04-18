@@ -122,14 +122,28 @@ class Entity:
     self.animation.update()
 
 
+
   def render(self, surf, offset = (0, 0)):
     asset = pygame.transform.flip(self.animation.img(), self.flip, False)
     surf.blit(asset, (self.pos[0] - offset[0] + self.animation_offset[0], self.pos[1] - offset[1] + self.animation_offset[1] ))
+
+
+
+
+
+
+
+
+
+
+
 
 class Player(Entity):
   def __init__(self, game, pos, size):
     super().__init__(game, 'player', pos, size, 5)
     self.air_time = 0
+    self.jumps = 1
+    self.doublejumps_cooldown = 0
 
   def update(self, tilemap, movement=(0, 0)):
     super().update(tilemap, movement)
@@ -137,8 +151,14 @@ class Player(Entity):
     self.air_time += 1
 
     if self.collision['bottom']:
+      if self.jumps <2:
+        self.jumps += 1
       self.air_time = 0
-    if self.air_time > 1 and self.velocity[1] < 0:
+      self.doublejumps_cooldown -=1
+
+    if self.air_time > 1 and self.jumps == 0 and self.velocity[1] < 5:
+      self.set_action('jump_double')
+    elif self.air_time > 1 and self.velocity[1] < 0:
       self.set_action('jump_up')
     elif self.air_time > 10 and self.velocity[1] > 0:
       self.set_action('jump_down')
@@ -146,3 +166,16 @@ class Player(Entity):
       self.set_action('run')
     else:
       self.set_action('idle')
+    print(self.doublejumps_cooldown)
+
+  def jump(self):
+    if self.jumps == 2:
+      self.velocity[1] -= 15
+      self.jumps -= 1
+    elif self.jumps == 1 and self.doublejumps_cooldown <= 0:   
+      self.velocity[1] -= 15
+      self.jumps -= 1
+      self.doublejumps_cooldown = 60
+
+
+

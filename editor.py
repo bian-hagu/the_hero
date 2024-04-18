@@ -5,6 +5,10 @@ from scripts.tilemap import Tilemap
 RENDER_SCALE =1.0
 class Editor:
   def __init__(self):
+    """
+    Initialize the game engine.
+
+    """
     pygame.init()
 
     pygame.display.set_caption("editor")
@@ -86,12 +90,14 @@ class Editor:
       # Render current tile in left-top corner 
       self.display.blit(current_tile_img, (5,5))
 
+      # Game events processing
       keys = pygame.key.get_pressed()
       for event in pygame.event.get():  
         if event.type == pygame.QUIT:
           pygame.quit() 
           sys.exit()  
-
+        
+        # Mouse down events processing
         if event.type == pygame.MOUSEBUTTONDOWN:
           if event.button == 1:
             self.clicking = True
@@ -107,13 +113,15 @@ class Editor:
               self.tile_group = (self.tile_group - 1) % len(self.tile_list)
             if event.button == 5:
               self.tile_group = (self.tile_group + 1) % len(self.tile_list)
+
+        # Mouse up events processing
         if event.type == pygame.MOUSEBUTTONUP:
           if event.button == 1:
             self.clicking = False
           if event.button == 3:
             self.right_clicking = False
 
-
+        # Keyboard down events processing
         if event.type == pygame.KEYDOWN:
           if event.key == pygame.K_ESCAPE:
             pygame.quit()
@@ -132,7 +140,7 @@ class Editor:
           if event.key == pygame.K_s or event.key == pygame.K_DOWN:
             self.movement[3] = True 
           
-
+        # Keyboard up events processing
         if event.type == pygame.KEYUP:
           if event.key == pygame.K_LSHIFT:
             self.shift = False
@@ -144,8 +152,8 @@ class Editor:
             self.movement[2] = False
           if event.key == pygame.K_s or event.key == pygame.K_DOWN:
             self.movement[3] = False
-
-
+      
+      # Key for jump function
       if keys[pygame.K_SPACE] and self.player.collision['bottom']:
         self.player.velocity[1] = -20 #height of jump = 4 blocks
 

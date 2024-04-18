@@ -63,6 +63,6 @@ class Tilemap:
       for y in range(int(offset[1]//self.size), int((offset[1] + surf.get_height())//self.size +1)):
         loc = str(x) + ';' + str(y)
         if loc in self.tilemap:
-          tile = self.tilemap[loc]
+          tile = self.tilemap[loc] 
           surf.blit(self.game.assets[tile['type']][tile['variant']], (tile['pos'][0]*self.size - offset[0], tile['pos'][1]*self.size - offset[1]))
 
