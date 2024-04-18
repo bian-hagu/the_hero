@@ -166,8 +166,6 @@ class Player(Entity):
       self.set_action('run')
     else:
       self.set_action('idle')
-    print(self.doublejumps_cooldown)
-
   def jump(self):
     if self.jumps == 2:
       self.velocity[1] -= 15
