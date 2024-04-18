@@ -64,7 +64,7 @@ class Entity:
       self.action = action
       self.animation = self.game.assets[self.type + '/' + self.action].copy()
   
-  def update(self, tilemap, movement = (0, 0)):
+  def update(self, tilemap, movement = (0, 0),):
     """
     Update the position and state of the entity.
 
@@ -80,8 +80,7 @@ class Entity:
     None
     """
     self.collision = {'top': False, 'bottom': False, 'left': False, 'right': False}
-    movement = (self.velocity[0] + movement[0], self.velocity[1] + movement[1])
-    
+    movement = [self.velocity[0] + movement[0], self.velocity[1] + movement[1]]
     # Update entity position x ----------------------------------------------------------------
     self.pos[0] += movement[0] * self.speed
     entity_rect = self.rect()
@@ -144,9 +143,11 @@ class Player(Entity):
     self.air_time = 0
     self.jumps = 1
     self.doublejumps_cooldown = 0
+    self.flashing = 0
+    self.spawn = 30
 
   def update(self, tilemap, movement=(0, 0)):
-    super().update(tilemap, movement)
+    super().update(tilemap=tilemap, movement=movement)
     
     self.air_time += 1
 
@@ -155,8 +156,10 @@ class Player(Entity):
         self.jumps += 1
       self.air_time = 0
       self.doublejumps_cooldown -=1
-
-    if self.air_time > 1 and self.jumps == 0 and self.velocity[1] < 5:
+    if self.spawn > 0:
+      self.spawn -= 1
+      self.set_action('spawn')
+    elif self.air_time > 1 and self.jumps == 0 and self.velocity[1] < 5:
       self.set_action('jump_double')
     elif self.air_time > 1 and self.velocity[1] < 0:
       self.set_action('jump_up')
@@ -164,8 +167,25 @@ class Player(Entity):
       self.set_action('jump_down')
     elif movement[0] != 0:
       self.set_action('run')
+    elif self.flashing != 0 and self.velocity[0] != 0:
+      self.set_action('flash')
     else:
       self.set_action('idle')
+
+    if self.flashing > 0:
+      self.flashing = max(0, self.flashing - 1)
+    if self.flashing < 0:
+      self.flashing = min(0, self.flashing + 1)
+    if abs(self.flashing) > 50:
+      self.velocity[0] = abs(self.flashing) / self.flashing * 8
+      if abs(self.flashing) == 51:
+        self.velocity[0] *= 0.1
+      
+    if self.velocity[0] > 0:
+      self.velocity[0] = max(self.velocity[0] - 0.1, 0)
+    else:
+      self.velocity[0] = min(self.velocity[0] + 0.1, 0)
+
   def jump(self):
     if self.jumps == 2:
       self.velocity[1] -= 15
@@ -174,6 +194,13 @@ class Player(Entity):
       self.velocity[1] -= 15
       self.jumps -= 1
       self.doublejumps_cooldown = 60
+
+  def flash(self):
+    if not self.flashing:
+      if self.flip:
+        self.flashing = -60
+      else:
+        self.flashing = 60
 
 
 

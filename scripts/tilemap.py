@@ -1,11 +1,13 @@
 import pygame
 import json
 
-NEIGHBOR_OFFSET = [ (-2, -2), (-2, -1), (-2, 0), (-2, 1), (-2, 2),
+NEIGHBOR_OFFSET = [ (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2),
+                    (-2, -2), (-2, -1), (-2, 0), (-2, 1), (-2, 2),
                     (-1, -2), (-1, -1), (-1, 0), (-1, 1), (-1, 2),
                     (0, -2), (0, -1), (0, 0), (0, 1), (0, 2),
                     (1, -2), (1, -1), (1, 0), (1, 1), (1, 2),
-                    (2, -2), (2, -1), (2, 0),  (2, 1), (2, 2)]
+                    (2, -2), (2, -1), (2, 0),  (2, 1), (2, 2),
+                    (3, -2), (3, -1), (3, 0), (3, 1), (3, 2)]
 PHYSICS_TILES = {'grass', 'stone'}
 
 
@@ -44,7 +46,7 @@ class Tilemap:
 
   def tiles_around(self, pos):
     tiles = []
-    tile_loc = (pos[0] // self.size, pos[1] // self.size)
+    tile_loc = (int(pos[0] // self.size), int(pos[1] // self.size))
     for offset in NEIGHBOR_OFFSET:
       check_loc = str(tile_loc[0] + offset[0]) + ";" + str(tile_loc[1] + offset[1])
       if check_loc in self.tilemap:
