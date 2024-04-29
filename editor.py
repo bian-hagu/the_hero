@@ -25,8 +25,8 @@ class Editor:
       'sign': load_imgs('tiles/sign'),
       'slab': load_imgs('tiles/slab'),
       'objects': load_imgs('objects'),
-      'tiles': load_imgs('tile'),
-      
+      'grass_new': load_imgs('tiles/grass_new'),
+      'spawners': load_imgs('tiles/spawners'),      
     }
     self.movement = [False, False, False, False]
 
@@ -40,11 +40,13 @@ class Editor:
     self.shift = False
     self.clicking = False
     self.right_clicking = False
+    self.ongrid = True
 
 
     try:
       self.tilemap.load('map.json')
     except:
+      print('Error loading map')
       pass
 
 
@@ -64,14 +66,18 @@ class Editor:
       tilepos = ((int(mpos[0]) // self.tilemap.size), (int(mpos[1]) // self.tilemap.size))
       
       # Render the current tile at mouse position
-      self.display.blit(current_tile_img, (tilepos[0] * self.tilemap.size, tilepos[1] * self.tilemap.size))
+      if self.ongrid:
+        self.display.blit(current_tile_img, (tilepos[0] * self.tilemap.size, tilepos[1] * self.tilemap.size))
+      else: 
+        self.display.blit(current_tile_img, (tilepos[0] * self.tilemap.size, tilepos[1] * self.tilemap.size))
 
       # print(render_scroll[0] //50)
-      if self.clicking:
+      if self.clicking and self.ongrid:
         self.tilemap.tilemap[str(tilepos[0]+ render_scroll[0]//self.tilemap.size) + ';' + str(tilepos[1]+render_scroll[1]//self.tilemap.size)] = {
           'type': self.tile_list[self.tile_group], 
           'variant': self.tile_variant, 
           'pos': (tilepos[0] + render_scroll[0]//self.tilemap.size, tilepos[1] + render_scroll[1]//self.tilemap.size)}
+        
 
       if self.right_clicking:
         tile_loc = str(str(tilepos[0]+ render_scroll[0]//self.tilemap.size) + ';' + str(tilepos[1]+render_scroll[1]//self.tilemap.size))
@@ -101,6 +107,13 @@ class Editor:
         if event.type == pygame.MOUSEBUTTONDOWN:
           if event.button == 1:
             self.clicking = True
+            if not self.ongrid:
+              self.tilemap.offgrid.append({
+                'type': self.tile_list[self.tile_group], 
+                'variant': self.tile_variant, 
+                'pos': (tilepos[0] * self.tilemap.size, tilepos[1] * self.tilemap.size)
+              })
+                
           if event.button == 3:
             self.right_clicking = True
           if self.shift:
@@ -139,6 +152,9 @@ class Editor:
             self.movement[2] = True
           if event.key == pygame.K_s or event.key == pygame.K_DOWN:
             self.movement[3] = True 
+          if event.key == pygame.K_g:
+            self.ongrid = not self.ongrid
+            print('ongrid:', self.ongrid)
           
         # Keyboard up events processing
         if event.type == pygame.KEYUP:

@@ -1,4 +1,6 @@
 import pygame
+import random
+
 GRAVITY = 10
 class Entity:
   def __init__(self, game, type, pos, size, speed=5):
@@ -202,5 +204,21 @@ class Player(Entity):
       else:
         self.flashing = 60
 
+class Enemy(Entity):
+  def __init__(self, game, pos, size):
+    super().__init__(game, 'enemy', pos, size)  
+
+    self.walking = 0
+
+  def update(self, tilemap, movement=(0, 0)):
+    if self.walking:
+      movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
+    elif random.random() < 0.01:
+      self.walking = random.randint(30, 120)
+
+
+
+
+    return super().update(tilemap, movement)
 
 

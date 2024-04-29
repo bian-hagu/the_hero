@@ -8,7 +8,7 @@ NEIGHBOR_OFFSET = [ (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2),
                     (1, -2), (1, -1), (1, 0), (1, 1), (1, 2),
                     (2, -2), (2, -1), (2, 0),  (2, 1), (2, 2),
                     (3, -2), (3, -1), (3, 0), (3, 1), (3, 2)]
-PHYSICS_TILES = {'grass', 'stone'}
+PHYSICS_TILES = {'grass', 'stone', 'grass_new'}
 
 
 class Tilemap:
@@ -25,9 +25,30 @@ class Tilemap:
     self.size = size
     self.tilemap = {}
     self.offgrid = []
-
-    # for i in range(50):
-    #   self.tilemap[str(i+1) + ';10'] = {'type': 'grass', 'variant': 1, 'pos': (1 + i, 10)}
+  
+  def extract(self, id_pairs, keep=False):
+    matches = []
+    for tile in self.offgrid.copy():
+      if (tile['type'], tile['variant']) in id_pairs:
+        matches.append(tile.copy())
+        if not keep:
+          self.offgrid.remove(tile)
+          print('delllll')
+    print(len(self.tilemap))
+                  
+    for loc in self.tilemap:
+      tile = self.tilemap[loc]
+      if (tile['type'], tile['variant']) in id_pairs:
+        matches.append(tile.copy())
+        matches[-1]['pos'] = matches[-1]['pos'].copy()
+        matches[-1]['pos'][0] *= self.size
+        matches[-1]['pos'][1] *= self.size
+        if not keep:
+          del self.tilemap[loc]
+          print('delllll')
+    print(len(self.tilemap))
+      
+    return matches
 
   def save(self, path):
     f = open(path, 'w')
@@ -38,11 +59,11 @@ class Tilemap:
     f = open(path, 'r')
     map_data = json.load(f)
     f.close()
+
     self.tilemap = map_data['tilemap']
     self.size = map_data['size']
     self.offgrid = map_data['offgrid']
-
-
+    print(self.offgrid)
 
   def tiles_around(self, pos):
     tiles = []
@@ -61,10 +82,13 @@ class Tilemap:
     return rects
 
   def render(self, surf, offset = (0, 0)):
+    for tile in self.offgrid:
+        surf.blit(self.game.assets[tile['type']][tile['variant']], (tile['pos'][0] - offset[0], tile['pos'][1] - offset[1]))
+
     for x in range(int(offset[0]//self.size), int((offset[0] + surf.get_width())//self.size +1)):
       for y in range(int(offset[1]//self.size), int((offset[1] + surf.get_height())//self.size +1)):
         loc = str(x) + ';' + str(y)
         if loc in self.tilemap:
           tile = self.tilemap[loc] 
+          # print(tile)
           surf.blit(self.game.assets[tile['type']][tile['variant']], (tile['pos'][0]*self.size - offset[0], tile['pos'][1]*self.size - offset[1]))
-
