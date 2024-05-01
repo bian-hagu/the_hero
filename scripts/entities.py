@@ -128,15 +128,6 @@ class Entity:
 
 
 
-
-
-
-
-
-
-
-
-
 class Player(Entity):
   def __init__(self, game, pos, size):
     super().__init__(game, 'player', pos, size, 5)
@@ -176,6 +167,7 @@ class Player(Entity):
     else:
       self.set_action('idle')
 
+
     if self.flashing > 0:
       self.flashing = max(0, self.flashing - 1)
     if self.flashing < 0:
@@ -190,8 +182,6 @@ class Player(Entity):
     else:
       self.velocity[0] = min(self.velocity[0] + 0.1, 0)
 
-      
-        
 
   def jump(self):
     if self.jumps == 2:
@@ -221,13 +211,13 @@ class Player(Entity):
         sw.flip = True
       else:
         sw = Sword(self.game, (self.pos[0] + self.size[0], self.pos[1]), self.size)
+        
       sw_rect = pygame.Rect(sw.pos[0], sw.pos[1], sw.size[0], sw.size[1])
       for rect in e_rects:
         if sw_rect.colliderect(rect):
           print('hit')
 
       sw.render(surf, offset)
-
 
 
 class Sword(Entity):
@@ -262,3 +252,4 @@ class Enemy(Entity):
 
   def render(self, surf, offset = (0,0)):
     super().render(surf, offset=offset)
+

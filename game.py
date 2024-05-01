@@ -48,7 +48,7 @@ class Game:
       if spawner['variant'] == 0:
         self.player.pos = spawner['pos']
         self.player.air_time = 0
-      elif spawner['variant'] == 6: 
+      elif spawner['variant'] == 6:  
         self.enemies.append(Enemy(self, 'rabit',spawner['pos'], (50,50), 10))
       else:
         print('unkown enemy')

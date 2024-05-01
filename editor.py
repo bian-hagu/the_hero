@@ -41,7 +41,7 @@ class Editor:
     self.right_clicking = False
     self.ongrid = True
 
-    self.load_level(0)
+    self.load_level(0) # replce 0 to n map
 
   def load_level(self, map_id):
     try:
@@ -86,7 +86,7 @@ class Editor:
           del self.tilemap.tilemap[tile_loc]
         for tile in self.tilemap.offgrid.copy():
           tile_img = self.assets[tile['type']][tile['variant']]
-          tile_r = pygame.rect(tile['pos'][0] - self.scroll[0], tile['pos'][1] - self.scroll[1], tile_img.get_width(), tile_img.get_height())
+          tile_r = pygame.Rect(tile['pos'][0] - self.scroll[0], tile['pos'][1] - self.scroll[1], tile_img.get_width(), tile_img.get_height())
           if tile_r.collidepoint(mpos):
             self.tilemap.offgrid.remove(tile)
 
@@ -143,7 +143,7 @@ class Editor:
           if event.key == pygame.K_LSHIFT:
             self.shift = True
           if event.key == pygame.K_RETURN:  
-            self.tilemap.save('map.json')
+            self.tilemap.save('data/maps/map0.json')
             print('Map saved')
           if event.key == pygame.K_a or event.key == pygame.K_LEFT:
             self.movement[0] = True
