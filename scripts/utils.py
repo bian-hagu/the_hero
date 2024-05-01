@@ -1,18 +1,18 @@
 import pygame 
 import os
-BASE_IMG_PATH = 'asset/imgs/'
+BASE_IMG_PATH = 'data/imgs/'
 DEFFAULT_SIZE = (50,50)
-def load_img(path, size = DEFFAULT_SIZE):
+def load_img(path, size=DEFFAULT_SIZE):
   imgs =pygame.image.load(BASE_IMG_PATH + path).convert()
   img = pygame.transform.scale(imgs, size)
   img.set_colorkey((0,0,0))
   return img
 
 
-def load_imgs(path):
+def load_imgs(path, size=DEFFAULT_SIZE):
   imgs = []
   for imgname in sorted(os.listdir(BASE_IMG_PATH + path)):
-    imgs.append(load_img(path + '/' + imgname))
+    imgs.append(load_img(path + '/' + imgname, size))
   return imgs
 
 class Animation:

@@ -10,7 +10,6 @@ NEIGHBOR_OFFSET = [ (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2),
                     (3, -2), (3, -1), (3, 0), (3, 1), (3, 2)]
 PHYSICS_TILES = {'grass', 'stone', 'grass_new'}
 
-
 class Tilemap:
   def __init__(self, game, size=50):
     """
@@ -33,8 +32,6 @@ class Tilemap:
         matches.append(tile.copy())
         if not keep:
           self.offgrid.remove(tile)
-          print('delllll')
-    print(len(self.tilemap))
                   
     for loc in self.tilemap:
       tile = self.tilemap[loc]
@@ -45,8 +42,6 @@ class Tilemap:
         matches[-1]['pos'][1] *= self.size
         if not keep:
           del self.tilemap[loc]
-          print('delllll')
-    print(len(self.tilemap))
       
     return matches
 
@@ -63,7 +58,6 @@ class Tilemap:
     self.tilemap = map_data['tilemap']
     self.size = map_data['size']
     self.offgrid = map_data['offgrid']
-    print(self.offgrid)
 
   def tiles_around(self, pos):
     tiles = []
@@ -81,6 +75,12 @@ class Tilemap:
         rects.append(pygame.Rect(tile['pos'][0] * self.size, tile['pos'][1] * self.size, self.size, self.size))
     return rects
 
+  def solid_check(self, pos):
+    tile_loc = str(int(pos[0] // self.size)) + ';' + str(int(pos[1] // self.size))
+    if tile_loc in self.tilemap:
+      if self.tilemap[tile_loc]['type'] in PHYSICS_TILES:
+        return self.tilemap[tile_loc]
+
   def render(self, surf, offset = (0, 0)):
     for tile in self.offgrid:
         surf.blit(self.game.assets[tile['type']][tile['variant']], (tile['pos'][0] - offset[0], tile['pos'][1] - offset[1]))
@@ -90,5 +90,4 @@ class Tilemap:
         loc = str(x) + ';' + str(y)
         if loc in self.tilemap:
           tile = self.tilemap[loc] 
-          # print(tile)
           surf.blit(self.game.assets[tile['type']][tile['variant']], (tile['pos'][0]*self.size - offset[0], tile['pos'][1]*self.size - offset[1]))

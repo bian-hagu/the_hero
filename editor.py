@@ -2,7 +2,6 @@ import sys
 import pygame
 from scripts.utils import load_imgs
 from scripts.tilemap import Tilemap
-RENDER_SCALE =1.0
 class Editor:
   def __init__(self):
     """
@@ -42,9 +41,11 @@ class Editor:
     self.right_clicking = False
     self.ongrid = True
 
+    self.load_level(0)
 
+  def load_level(self, map_id):
     try:
-      self.tilemap.load('map.json')
+      self.tilemap.load('data/maps/map' + str(map_id) + '.json')
     except:
       print('Error loading map')
       pass

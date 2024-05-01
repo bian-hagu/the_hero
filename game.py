@@ -26,31 +26,37 @@ class Game:
       'player/jump_double': Animation(load_imgs('entities/hero/hero_jump_double'), duration = 6),
       'player/flash': Animation(load_imgs('entities/hero/hero_dust'), duration=4),
       'player/spawn': Animation(load_imgs('entities/hero/hero_spawn'), duration=8),
+      'player/attack': Animation(load_imgs('entities/hero/hero_attack'), duration=4),
+      'sword/idle': Animation(load_imgs('entities/hero/hero_sword'), duration=4),
       'rabit/idle': Animation(load_imgs('entities/rabit/rabit_idle'), duration=4),
-      'rabit/walk': Animation(load_imgs('entities/rabit/rabit_walk'), duration=6),
-
+      'rabit/run': Animation(load_imgs('entities/rabit/rabit_walk'), duration=6),
     }
 
     self.player = Player(self, (50, 500), (50, 50))
     self.tilemap = Tilemap(self, size=50)
-    self.scroll = [0,0]
-    self.particles = []
+    self.load_level(0)
+
+  def load_level(self, map_id):
     try:
-      self.tilemap.load('map.json')
+      self.tilemap.load('data/maps/map' + str(map_id) + '.json')
     except:
       print('Error loading map')
       pass
 
     self.enemies = []
-    print(len(self.tilemap.tilemap))
-    for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 1)]):
-      print(len(self.tilemap.tilemap))  
+    for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 6)]):
       if spawner['variant'] == 0:
         self.player.pos = spawner['pos']
         self.player.air_time = 0
+      elif spawner['variant'] == 6: 
+        self.enemies.append(Enemy(self, 'rabit',spawner['pos'], (50,50), 10))
       else:
-        print('enemy')
+        print('unkown enemy')
+    
+    self.scroll = [0,0]
+    self.particles = []
 
+    
   def run(self):    
     while True:
       self.display.blit(self.assets['background'], (0,0))
@@ -67,19 +73,18 @@ class Game:
 
       self.tilemap.render(self.display, offset=render_scroll)
       
+      for enemy in self.enemies.copy(): 
+        enemy.update(self.tilemap, (0,0))
+        enemy.render(self.display, offset=render_scroll)
+
       self.player.update(tilemap=self.tilemap, movement=(self.movement[1] - self.movement[0], 0))
       self.player.render(self.display, offset=render_scroll)    
-
 
       for particle in self.particles.copy():
         kill = particle.update()
         particle.render(self.display, offset=render_scroll)
         if kill:
           self.particles.remove(particle)
-
-
-
-
 
       keys = pygame.key.get_pressed()
       for event in pygame.event.get():  
@@ -99,13 +104,15 @@ class Game:
           if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
             self.movement[1] = True 
 
-
         if event.type == pygame.KEYUP:
           if event.key == pygame.K_a or event.key == pygame.K_LEFT:
             self.movement[0] = False
           if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
             self.movement[1] = False
         
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          if event.button == 1:
+            self.player.attack(self.enemies, self.display, render_scroll)
 
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
