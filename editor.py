@@ -55,6 +55,7 @@ class Editor:
 
   def run(self):  
     while True:
+      self.tilemap.save('data/maps/map0.json')
       self.display.fill('black')
       self.scroll = (self.scroll[0] + (self.movement[1] - self.movement[0]), self.scroll[1] + (self.movement[3]-self.movement[2]))
       render_scroll = (int(self.scroll[0]*50), int(self.scroll[1])*50)
@@ -128,7 +129,7 @@ class Editor:
             if event.button == 5:
               self.tile_group = (self.tile_group + 1) % len(self.tile_list)
 
-        # Mouse up events processing
+        # Mouse up events proce ssing
         if event.type == pygame.MOUSEBUTTONUP:
           if event.button == 1:
             self.clicking = False
