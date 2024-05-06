@@ -21,7 +21,7 @@ class Game:
       'background1': load_img('background/bg.png', (1280,720)),
 
       'player/idle': Animation(load_imgs('entities/hero/hero_idle'), duration=8), 
-      'player/hit': Animation(load_imgs('entities/hero/hero_hit'), duration=3),
+      'player/hit': Animation(load_imgs('entities/hero/hero_hit'), duration=4),
       'player/run': Animation(load_imgs('entities/hero/hero_run'), duration= 6),
       'player/death': Animation(load_imgs('entities/hero/hero_death'), duration=8),
       'player/jump_up': Animation(load_imgs('entities/hero/hero_jump_up'), duration = 3),
@@ -33,14 +33,16 @@ class Game:
       'sword/idle': Animation(load_imgs('entities/hero/hero_sword'), duration=4),
 
       'bomber/idle': Animation(load_imgs('entities/bomber/bomber_goblin_idle'), duration=8),
-      'bomber/hit': Animation(load_imgs('entities/bomber/bomber_goblin_hit'), duration=3),
-      'bomber/attack': Animation(load_imgs('entities/bomber/bomber_goblin_attack'), duration=6),
+      'bomber/hit': Animation(load_imgs('entities/bomber/bomber_goblin_hit'), duration=4),
+      'bomber/attack': Animation(load_imgs('entities/bomber/bomber_goblin_attack'), duration=8),
       'bomber/death': Animation(load_imgs('entities/bomber/bomber_goblin_death'), duration=6),
+      'bomb/idle': Animation(load_imgs('entities/bomb/bomb_idle'), duration=4),
+      'bomb/explode': Animation(load_imgs('entities/bomb/bomb_explode', (100,100)), duration=8),
 
       'goblin/idle': Animation(load_imgs('entities/goblin/goblin_idle'), duration=4),
       'goblin/run': Animation(load_imgs('entities/goblin/goblin_run'), duration=6),
-      'goblin/hit': Animation(load_imgs('entities/goblin/goblin_hit'), duration=3),
-      'goblin/attack': Animation(load_imgs('entities/goblin/goblin_attack'), duration=4),
+      'goblin/hit': Animation(load_imgs('entities/goblin/goblin_hit'), duration=4),
+      'goblin/attack': Animation(load_imgs('entities/goblin/goblin_attack'), duration=8),
       'goblin/death': Animation(load_imgs('entities/goblin/goblin_death'), duration=4),
 
       'slime/idle': Animation(load_imgs('entities/slime/slime_idle'), duration=4),
@@ -92,11 +94,10 @@ class Game:
     
   def run(self):    
     while True:
-      if self.over <= 0 or self.player.pos[1] > 1000:
-        print('Game over')
-        pygame.quit()
-        sys.exit() 
-        
+      # if self.over <= 0 or self.player.pos[1] > 1000:
+      #   print('Game over')
+      #   pygame.quit()
+      #   sys.exit() 
       self.display.blit(self.assets['background'], (0,0))
       
       if self.player.pos[0] > self.display.get_width()/2:
@@ -112,6 +113,8 @@ class Game:
       self.tilemap.render(self.display, offset=render_scroll)
       
       for enemy in self.enemies.copy(): 
+        if enemy.hp <= 0:
+          self.enemies.remove(enemy)
         enemy.update(self.tilemap, (0,0))
         enemy.render(self.display, offset=render_scroll)
 

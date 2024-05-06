@@ -3,7 +3,7 @@ import random
 
 GRAVITY = 10
 class Entity:
-  def __init__(self, game, type, pos, size, hp = 100, speed=5):
+  def __init__(self, game, type, pos, size, hp = 100, dmg = 25, speed=1,attack_speed = 60):
     """
     Initialize a new Entity instance.
 
@@ -30,14 +30,19 @@ class Entity:
     self.pos = list(pos)
     self.size = size
     self.velocity = [0,0]
-    self.speed = speed
     self.hp = hp
+    self.dmg = dmg
+    self.speed = speed
+    self.attack_speed = attack_speed
     self.collision = {'top': False, 'bottom': False, 'left': False, 'right': False}
     self.animation_offset = (-3,-3)
     self.flip = False
     self.action = ''
     self.set_action('idle')
-    self.hitting = False
+    self.hitting = 0  
+    self.attacking = 0
+    self.attack_cd = 0
+
 
 
 
@@ -82,6 +87,8 @@ class Entity:
     -------
     None
     """
+    self.hitting += -1 if self.hitting > 0 else 0
+
     self.collision = {'top': False, 'bottom': False, 'left': False, 'right': False}
     movement = [self.velocity[0] + movement[0], self.velocity[1] + movement[1]]
     # Update entity position x ----------------------------------------------------------------
@@ -128,26 +135,35 @@ class Entity:
     asset = pygame.transform.flip(self.animation.img(), self.flip, False)
     surf.blit(asset, (self.pos[0] - offset[0] + self.animation_offset[0], self.pos[1] - offset[1] + self.animation_offset[1] ))
 
+  def hit(self, dmg):
+    self.pos[0] += -30 if not self.flip else 30
+    self.hp -= dmg
+    self.hitting = 10
+
 
 
 class Player(Entity):
   def __init__(self, game, pos, size):
-    super().__init__(game, 'player', pos, size)
+    super().__init__(game, 'player', pos, size, 100, 25, 5)
     self.air_time = 0
     self.jumps = 1
     self.doublejumps_cd = 0
     self.flashing = 0
     self.spawn = 30
-    self.attack_cd = 0
-
 
   def update(self, tilemap, enemies, movement=(0, 0)):
     super().update(tilemap=tilemap, movement=movement)
-
     self.air_time += 1
+    self.attacking -= 1
     self.attack_cd -= 1
     
-    self.hit(enemies)
+    c_rect = self.rect()
+    for enemy in enemies:
+      if enemy.type == 'slime':
+        e_rect= enemy.rect()
+        if c_rect.colliderect(e_rect):
+          self.hitting = 10
+          self.hit(enemy.dmg)
 
     if self.collision['bottom']:
       if self.jumps <2:
@@ -158,22 +174,22 @@ class Player(Entity):
     if self.spawn > 0:
       self.spawn -= 1
       self.set_action('spawn')
-    elif self.hp <= 0:
-      self.set_action('death')
-      self.game.over -= 1
+    # elif self.hp <= 0:
+    #   self.set_action('death')
+    #   self.game.over -= 1
     elif self.air_time > 1 and self.jumps == 0 and self.velocity[1] < 5:
       self.set_action('jump_double')
     elif self.air_time > 1 and self.velocity[1] < 0:
       self.set_action('jump_up')
     elif self.air_time > 10 and self.velocity[1] > 0:
       self.set_action('jump_down')
-    elif self.hitting:
+    elif self.hitting > 0:
       self.set_action('hit')
     elif movement[0] != 0:
       self.set_action('run')
     elif self.flashing != 0 and self.velocity[0] != 0:
       self.set_action('flash')
-    elif self.attack_cd >= 0:
+    elif self.attacking >= 0:
       self.set_action('attack')
     else:
       self.set_action('idle')
@@ -190,20 +206,8 @@ class Player(Entity):
     if self.velocity[0] > 0:
       self.velocity[0] = max(self.velocity[0] - 0.1, 0)
     else:
-      self.velocity[0] = min(self.velocity[0] + 0.1, 0)
-
-  def hit(self, enemies):
-    self.hitting = False
-    e_rects = []
-    for enemy in enemies:
-      e_rects.append(enemy.rect())
-
-    c_rect = self.rect()
-    for rect in e_rects:
-      if c_rect.colliderect(rect):
-        self.hitting = True
-        self.pos[0] += -30 if not self.flip else 30
-        self.hp -= 10
+      self.velocity[0] = min(self.velocity[0] + 0.1, 0)    
+    # print(self.hp)
         
   def jump(self):
     if self.jumps == 2:
@@ -222,24 +226,28 @@ class Player(Entity):
         self.flashing = 60
 
   def attack(self, enemies, surf, offset):
-    if self.attack_cd <= -1:
-      self.attack_cd = 10
-      e_rects = []
-      for enemy in enemies:
-        e_rects.append(enemy.rect())
+    if self.attack_cd < 0:
+      self.attack_cd = self.attack_speed
+      if self.attacking <= -1:
+        self.attacking = 10
 
-      if self.flip:
-        sw = Sword(self.game, (self.pos[0] - self.size[0], self.pos[1]), self.size)
-        sw.flip = True
-      else:
-        sw = Sword(self.game, (self.pos[0] + self.size[0], self.pos[1]), self.size)
-        
-      sw_rect = pygame.Rect(sw.pos[0], sw.pos[1], sw.size[0], sw.size[1])
-      for rect in e_rects:
-        if sw_rect.colliderect(rect):
-          print('hit')
+        if self.flip:
+          sw = Sword(self.game, (self.pos[0] - self.size[0], self.pos[1]), self.size)
+          sw.flip = True
+        else:
+          sw = Sword(self.game, (self.pos[0] + self.size[0], self.pos[1]), self.size)
 
-      sw.render(surf, offset)
+        sw_rect = pygame.Rect(sw.pos[0], sw.pos[1], sw.size[0], sw.size[1])
+        sw.render(surf, offset)
+
+        for enemy in enemies:
+          e_rect=enemy.rect()
+          if sw_rect.colliderect(e_rect):
+            enemy.hit(self.dmg)
+
+          
+
+
 
 class Sword(Entity):
   def __init__(self, game, pos, size):
@@ -247,61 +255,146 @@ class Sword(Entity):
 
 class Bomber(Entity):
   def __init__(self, game, pos, size, speed = 5):
-    super().__init__(game, 'bomber', pos, size, speed)  
-
+    super().__init__(game, 'bomber', pos, size, 50, speed, attack_speed=120)  
     self.walking = 0
 
   def update(self, tilemap, movement=(0, 0)):
-    if self.walking:
-      if tilemap.solid_check((self.rect().centerx + (-24 if self.flip else 24), self.pos[1] + 50)):
-        if (self.collision['right'] or self.collision['left']):
-          self.flip = not self.flip
+    player = self.game.player
+    self.attack(player)
+    self.attack_cd -= 1
+    self.attacking -= 1
+
+    if self.pos[0] < player.pos[0]:
+      self.flip = False
+    elif self.pos[0] > player.pos[0]:
+      self.flip = True
+
+    if self.attacking < 0:
+      if self.walking:
+        if tilemap.solid_check((self.rect().centerx + (-24 if self.flip else 24), self.pos[1] + 50)):
+          if (self.collision['right'] or self.collision['left']):
+            self.flip = not self.flip
+          else:
+            movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
         else:
-          movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
-      else:
-        self.flip = not self.flip
-      self.walking = max(0, self.walking -1)
-    elif random.random() < 0.01:
-      self.walking = random.randint(30, 120)
-
-    super().update(tilemap, movement)
-    # if movement[0] != 0:
-    #   self.set_action('run')
-    # else: 
-    #   self.set_action('idle')
-
-  # def render(self, surf, offset = (0,0)):
-  #   super().render(surf, offset=offset)
-
-class Goblin(Entity):
-  def __init__(self, game, pos, size, speed = 5):
-    super().__init__(game, 'goblin', pos, size, speed)  
-
-    self.walking = 0
-
-  def update(self, tilemap, movement=(0, 0)):
-    if self.walking:
-      if tilemap.solid_check((self.rect().centerx + (-24 if self.flip else 24), self.pos[1] + 50)):
-        if (self.collision['right'] or self.collision['left']):
           self.flip = not self.flip
-        else:
-          movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
-      else:
-        self.flip = not self.flip
-      self.walking = max(0, self.walking -1)
-    elif random.random() < 0.01:
-      self.walking = random.randint(30, 120)
+        self.walking = max(0, self.walking -1)
+      elif random.random() < 0.01:
+        self.walking = random.randint(30, 120)
 
     super().update(tilemap, movement)
 
-    if movement[0] != 0:
-      self.set_action('run')
+    if self.hitting > 0:
+      self.set_action('hit')
+    elif self.attacking >= 0:
+      self.set_action('attack')
     else: 
       self.set_action('idle')
 
+  def attack(self, player):
+    if self.attack_cd < 0:
+      bomb = Bomb(self.game, self.pos, player.pos)
+      self.game.enemies.append(bomb)
+      self.attack_cd = self.attack_speed
+      if self.attacking <= -1:
+        self.attacking = 10
+
+
+class Bomb(Entity):
+  def __init__(self, game, pos, d_pos):
+    super().__init__(game, 'bomb', pos, (50,50), 100, 0)  
+    self.des_pos = d_pos
+    self.flying = False
+    self.exploding = 30
+
+  def update(self, tilemap, movement = (0,0)):
+    if not self.flying:
+      self.velocity = [(self.des_pos[0] - self.pos[0])/self.size[0],-15]
+      self.flying = True
+    if self.collision['bottom']:
+      self.velocity = [0,0]
+      self.explode()
+
+
+    
+    
+    super().update(tilemap, movement)
+
+    if self.exploding <= 0:
+      self.set_action('explode')
+    else:
+      self.set_action('idle')
+
+  def explode(self):
+    self.exploding -=1
+    if self.exploding == 0:
+      self.pos = [self.rect().centerx, self.rect().centery]
+    if self.exploding <= -10:
+      self.game.enemies.remove(self)
+
+
+class Goblin(Entity):
+  def __init__(self, game, pos, size, speed = 3):
+    super().__init__(game, 'goblin', pos, size, 150, 20, speed)  
+
+    self.walking = 0
+
+  def update(self, tilemap, movement=(0, 0)):
+    player = self.game.player
+    self.attack(player)
+    self.attack_cd -= 1
+    self.attacking -= 1
+
+    if self.pos[1] == player.pos[1]:
+      if self.pos[0]+ self.size[0] < player.pos[0] :
+        self.flipped = True
+        movement = (movement[0] - 0.5 if movement[0] > 0 else 0.5, movement[1])
+      elif self.pos[0] - self.size[0] > player.pos[0]:
+        self.flipped = False
+        movement = (movement[0] + 0.5 if movement[0] < 0 else -0.5, movement[1])
+      else:
+        movement = (0,0)
+
+      
+    if self.attacking < 0:
+      if self.walking:
+        if tilemap.solid_check((self.rect().centerx + (-24 if self.flip else 24), self.pos[1] + 50)):
+          if (self.collision['right'] or self.collision['left']):
+            self.flip = not self.flip
+          else:
+            movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
+        else:
+          self.flip = not self.flip
+        self.walking = max(0, self.walking -1)
+      elif random.random() < 0.01:
+        self.walking = random.randint(30, 120)
+    super().update(tilemap, movement)
+
+    if self.hitting > 0:
+      self.set_action('hit')
+    elif movement[0] != 0:
+      self.set_action('run')
+    elif self.attacking >= 0:
+      self.set_action('attack')
+    else: 
+      self.set_action('idle')
+    
+  def attack(self, player):
+    if self.attack_cd < 0:
+      self.attack_cd = self.attack_speed
+      self.velocity = [0,0]
+
+      rect = pygame.Rect(self.pos[0] - self.size[0]/2, self.pos[1] , self.size[0] * 2, self.size[1])
+      p_rect = player.rect()
+      if rect.colliderect(p_rect):
+        self.velocity = [0,0]
+        self.attacking = 10
+        player.hit(self.dmg)
+
+
 class Slime(Entity):
   def __init__(self, game, pos, size, speed = 3):
-    super().__init__(game, 'slime', pos, size, speed)  
+    super().__init__(game, 'slime', pos, size, 100, 10, speed)  ,
 
     self.walking = 0
     self.flip = True
@@ -312,7 +405,7 @@ class Slime(Entity):
         if (self.collision['right'] or self.collision['left']):
           self.flip = not self.flip
         else:
-          movement = (movement[0] - 0.4 if self.flip else 0.4, movement[1])
+          movement = (movement[0] - 0.5 if self.flip else 0.5, movement[1])
       else:
         self.flip = not self.flip
       self.walking = max(0, self.walking -1)
@@ -320,14 +413,14 @@ class Slime(Entity):
 
     elif random.random() < 0.01:
       self.walking = random.randint(30, 120)
-
     super().update(tilemap, movement)
 
-    if movement[0] != 0:
+
+    if self.hitting > 0:
+      self.set_action('hit')
+    elif movement[0] != 0:
       self.set_action('run')
     else: 
       self.set_action('idle')
 
-  def render(self, surf, offset = (0,0)):
-    
-    super().render(surf, offset=offset)
+
