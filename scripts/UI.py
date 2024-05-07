@@ -53,7 +53,7 @@ class Menu:
     for button in self.buttons:
       button.draw()
 
-  def is_click(self, x, y):
+  def is_click(self, x=0, y=0):
     mpos = pygame.mouse.get_pos()
     rect = pygame.Rect(mpos[0]-x, mpos[1]-y, 1, 1)
     for event in pygame.event.get():
@@ -81,3 +81,13 @@ class UI(Menu):
     label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2)
     return label
 
+  def main_menu(self):
+    width, height = self.surf.get_width(), self.surf.get_height()
+
+    menu = Menu(self.surf, (width//3, 200), (width//3, height//1.5), ['CONTINUE', 'NEW GAME', 'SELECT LEVEL', 'QUIT'])
+    menu.draw()
+    label = menu.is_click()
+    return label
+
+  def select_level(self):
+    width, height = self.surf.get_width(), self.surf.get_height()

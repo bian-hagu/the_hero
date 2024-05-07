@@ -10,10 +10,9 @@ class Game:
 
     pygame.display.set_caption("The Hero")
     self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
-    self.display = pygame.Surface((1280, 720))
-
     self.clock = pygame.time.Clock()
-    self.movement = [False, False]
+
+  def load_level(self, map_id):
     self.assets = {
       'grass': load_imgs('tiles/grass'), 
       'grass_new': load_imgs('tiles/grass_new'),
@@ -55,17 +54,17 @@ class Game:
       'slime/death': Animation(load_imgs('entities/slime/slime_death'), duration=4),
 
     }
+    
+    self.display = pygame.Surface((1280, 720))
+    self.player = Player(self, (50, 500), (50, 50))
+    self.tilemap = Tilemap(self, size=50)
+    self.scroll = [0,0]
+    self.movement = [False, False]
+    
 
     self.is_pause = False
     self.label = ''
-  
 
-
-    self.player = Player(self, (50, 500), (50, 50))
-    self.tilemap = Tilemap(self, size=50)
-    self.load_level(0)
-
-  def load_level(self, map_id):
     try:
       self.tilemap.load('data/maps/map' + str(map_id) + '.json')
     except:
@@ -97,9 +96,7 @@ class Game:
         self.enemies.append(Enemy(self, 'worm',spawner['pos'], (50,50)))
       else: 
         print('unkown enemy')
-    self.scroll = [0,0]
-    self.particles = []
-
+  
   def draw_hub(self, offset = (0,0)):
     self.display.blit(self.assets['life'], (37,35))
     hp_percent = self.player.hp/100
@@ -115,7 +112,10 @@ class Game:
     pygame.draw.rect(self.display, 'white', (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_percent, 7), 0, 4)
     self.display.blit(self.assets['cooldown'], cooldown_pos)
 
-  def run(self):    
+  def load_game(self):
+    pass
+  def run(self, id_map):    
+    self.load_level(id_map)
     while True:
       for event in pygame.event.get():  
         if event.type == pygame.QUIT:
@@ -156,12 +156,6 @@ class Game:
         self.player.render(self.display, offset=render_scroll)    
         
 
-        for particle in self.particles.copy():
-          kill = particle.update()
-          particle.render(self.display, offset=render_scroll)
-          if kill:
-            self.particles.remove(particle)
-
         for event in pygame.event.get():
           if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -197,4 +191,106 @@ class Game:
       pygame.display.update()
       self.clock.tick(60)
 
-Game().run()
+  def main_menu(self):
+    self.assets = {
+      'background': load_img('background/background.png', (1280, 720)),
+
+    }
+    self.display = pygame.Surface((1280, 720))
+
+    font = pygame.font.Font('data/font/Pixellari.ttf', 128)
+    gameName_text = font.render('THE HERO', True, (40,40,40))
+    textRect = gameName_text.get_rect()
+    textRect.centerx = 1280//2
+    textRect.top = 50
+
+    description_font = pygame.font.Font('data/font/Pixellari.ttf', 24)
+    description = description_font.render('@Made by Hagu Bian', True, (200,200,200,10))
+    descriptionRect = description.get_rect()
+    descriptionRect.bottomright = (1250, 720)
+
+
+    while True:
+      self.display.blit(self.assets['background'], (0, 0))
+      self.display.blit(gameName_text, textRect)
+      self.display.blit(description, descriptionRect)
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          pygame.quit()
+          sys.exit()
+        if event.type == pygame.KEYDOWN:
+          if event.key == pygame.K_ESCAPE:
+            pygame.quit()
+            sys.exit()
+      label = UI(self.display).main_menu()
+
+      if label == 'QUIT':
+        pygame.quit()
+        sys.exit()
+      elif label == 'SELECT LEVEL':
+        return 'SELECT LEVEL'
+      elif label == 'NEW GAME':
+        return 'NEW GAME'
+      if label == 'CONTINUE':
+        return 'CONTINUE'
+      self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
+      pygame.display.update()
+      self.clock.tick(30)
+  
+  def select_level(self):
+    self.assets = {
+      'background': load_img('background/background.png', (1280, 720)),
+
+    }
+    self.display = pygame.Surface((1280, 720))
+
+    # font = pygame.font.Font('data/font/Pixellari.ttf', 128)
+    # gameName_text = font.render('THE HERO', True, (40,40,40))
+    # textRect = gameName_text.get_rect()
+    # textRect.centerx = 1280//2
+    # textRect.top = 50
+
+    # description_font = pygame.font.Font('data/font/Pixellari.ttf', 24)
+    # description = description_font.render('@Made by Hagu Bian', True, (200,200,200,10))
+    # descriptionRect = description.get_rect()
+    # descriptionRect.bottomright = (1250, 720)
+
+
+    while True:
+      self.display.blit(self.assets['background'], (0, 0))
+      # self.display.blit(gameName_text, textRect)
+      # self.display.blit(description, descriptionRect)
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          pygame.quit()
+          sys.exit()
+        if event.type == pygame.KEYDOWN:
+          if event.key == pygame.K_ESCAPE:
+            pygame.quit()
+            sys.exit()
+      label = UI(self.display).select_level()
+
+      if label == 'QUIT':
+        pygame.quit()
+        sys.exit()
+      elif label == 'SELECT LEVEL':
+        return 'SELECT LEVEL'
+      elif label == 'NEW GAME':
+        return 'NEW GAME'
+      if label == 'CONTINUE':
+        return 'CONTINUE'
+      self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
+      pygame.display.update()
+      self.clock.tick(30)
+
+
+
+if __name__ == '__main__':
+  game = Game()
+  label = game.main_menu()
+  if label == 'SELECT LEVEL':
+    pass
+  elif label == 'NEW GAME':
+    game.run(0)
+  elif label == 'CONTINUE':
+    pass
