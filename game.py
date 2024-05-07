@@ -19,6 +19,8 @@ class Game:
       'spawners': load_imgs('tiles/spawners'),
       'background': load_img('background/background.png', (1280,720)),
       'background1': load_img('background/bg.png', (1280,720)),
+      'hud_health': load_img('hub/hud_health.png', (300, 100)),
+      'cooldown': load_img('hub/cooldown.png', (50,15)),
 
       'player/idle': Animation(load_imgs('entities/hero/hero_idle'), duration=8), 
       'player/hit': Animation(load_imgs('entities/hero/hero_hit'), duration=4),
@@ -37,7 +39,7 @@ class Game:
       'bomber/attack': Animation(load_imgs('entities/bomber/bomber_goblin_attack'), duration=8),
       'bomber/death': Animation(load_imgs('entities/bomber/bomber_goblin_death'), duration=6),
       'bomb/idle': Animation(load_imgs('entities/bomb/bomb_idle'), duration=4),
-      'bomb/explode': Animation(load_imgs('entities/bomb/bomb_explode', (100,100)), duration=8),
+      'bomb/explode': Animation(load_imgs('entities/bomb/bomb_explode', (100,100)), duration=4),
 
       'goblin/idle': Animation(load_imgs('entities/goblin/goblin_idle'), duration=4),
       'goblin/run': Animation(load_imgs('entities/goblin/goblin_run'), duration=6),
@@ -91,7 +93,21 @@ class Game:
     self.scroll = [0,0]
     self.particles = []
 
+  def draw_hub(self, surf, offset = (0,0)):
+    hp_percent = self.player.hp/100
+    dj_precent = (60 - self.player.doublejumps_cd)/60
+
+    if hp_percent < 0.25:
+      pygame.draw.rect(surf, 'red', (110, 25, 190*hp_percent, 32), 0, 8)
+    else:
+      pygame.draw.rect(surf, 'green', (110, 25, 190*hp_percent, 32), 0, 8)
+    surf.blit(self.assets['hud_health'], (10,10))
     
+    cooldown_pos = (self.player.pos[0] - offset[0], self.player.pos[1] - offset[1] - 20)
+    pygame.draw.rect(surf, 'white', (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_precent, 7), 0, 4)
+    surf.blit(self.assets['cooldown'], cooldown_pos)
+
+
   def run(self):    
     while True:
       # if self.over <= 0 or self.player.pos[1] > 1000:
@@ -99,7 +115,7 @@ class Game:
       #   pygame.quit()
       #   sys.exit() 
       self.display.blit(self.assets['background'], (0,0))
-      
+
       if self.player.pos[0] > self.display.get_width()/2:
         self.scroll[0] += (self.player.rect().centerx - self.display.get_width()/2 - self.scroll[0])
       if self.player.pos[1] < 300:
@@ -111,7 +127,7 @@ class Game:
 
 
       self.tilemap.render(self.display, offset=render_scroll)
-      
+
       for enemy in self.enemies.copy(): 
         if enemy.hp <= 0:
           self.enemies.remove(enemy)
@@ -120,6 +136,7 @@ class Game:
 
       self.player.update(tilemap=self.tilemap, enemies=self.enemies, movement=(self.movement[1] - self.movement[0], 0))
       self.player.render(self.display, offset=render_scroll)    
+      
 
       for particle in self.particles.copy():
         kill = particle.update()
@@ -155,6 +172,7 @@ class Game:
           if event.button == 1:
             self.player.attack(self.enemies, self.display, render_scroll)
 
+      self.draw_hub(self.display, offset=render_scroll)
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
       self.clock.tick(60)

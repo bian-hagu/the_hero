@@ -41,7 +41,9 @@ class Editor:
     self.right_clicking = False
     self.ongrid = True
 
-    self.load_level(0) # replce 0 to n map
+    self.map = '0'
+
+    self.load_level(self.map) # replce 0 to n map
 
   def load_level(self, map_id):
     try:
@@ -50,12 +52,9 @@ class Editor:
       print('Error loading map')
       pass
 
-
-
-
   def run(self):  
     while True:
-      self.tilemap.save('data/maps/map0.json')
+      self.tilemap.save(f'data/maps/map{self.map}.json')
       self.display.fill('black')
       self.scroll = (self.scroll[0] + (self.movement[1] - self.movement[0]), self.scroll[1] + (self.movement[3]-self.movement[2]))
       render_scroll = (int(self.scroll[0]*50), int(self.scroll[1])*50)
@@ -144,7 +143,7 @@ class Editor:
           if event.key == pygame.K_LSHIFT:
             self.shift = True
           if event.key == pygame.K_RETURN:  
-            self.tilemap.save('data/maps/map0.json')
+            self.tilemap.save(f'data/maps/map{self.map}.json')
             print('Map saved')
           if event.key == pygame.K_a or event.key == pygame.K_LEFT:
             self.movement[0] = True

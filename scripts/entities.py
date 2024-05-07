@@ -2,6 +2,7 @@ import pygame
 import random
 
 GRAVITY = 10
+
 class Entity:
   def __init__(self, game, type, pos, size, hp = 100, dmg = 25, speed=1,attack_speed = 60):
     """
@@ -140,8 +141,6 @@ class Entity:
     self.hp -= dmg
     self.hitting = 10
 
-
-
 class Player(Entity):
   def __init__(self, game, pos, size):
     super().__init__(game, 'player', pos, size, 100, 25, 5)
@@ -169,7 +168,7 @@ class Player(Entity):
       if self.jumps <2:
         self.jumps += 1
       self.air_time = 0
-      self.doublejumps_cd -=1
+      self.doublejumps_cd  -= 1 if self.doublejumps_cd > 0 else 0
 
     if self.spawn > 0:
       self.spawn -= 1
@@ -207,7 +206,6 @@ class Player(Entity):
       self.velocity[0] = max(self.velocity[0] - 0.1, 0)
     else:
       self.velocity[0] = min(self.velocity[0] + 0.1, 0)    
-    # print(self.hp)
         
   def jump(self):
     if self.jumps == 2:
@@ -244,10 +242,6 @@ class Player(Entity):
           e_rect=enemy.rect()
           if sw_rect.colliderect(e_rect):
             enemy.hit(self.dmg)
-
-          
-
-
 
 class Sword(Entity):
   def __init__(self, game, pos, size):
@@ -299,10 +293,9 @@ class Bomber(Entity):
       if self.attacking <= -1:
         self.attacking = 10
 
-
 class Bomb(Entity):
   def __init__(self, game, pos, d_pos):
-    super().__init__(game, 'bomb', pos, (50,50), 100, 0)  
+    super().__init__(game, 'bomb', pos, (50,50), 1, 30)  
     self.des_pos = d_pos
     self.flying = False
     self.exploding = 30
@@ -311,13 +304,10 @@ class Bomb(Entity):
     if not self.flying:
       self.velocity = [(self.des_pos[0] - self.pos[0])/self.size[0],-15]
       self.flying = True
+
     if self.collision['bottom']:
-      self.velocity = [0,0]
       self.explode()
 
-
-    
-    
     super().update(tilemap, movement)
 
     if self.exploding <= 0:
@@ -326,12 +316,20 @@ class Bomb(Entity):
       self.set_action('idle')
 
   def explode(self):
+    pos = self.pos
+    self.velocity = [0, 0]
     self.exploding -=1
     if self.exploding == 0:
-      self.pos = [self.rect().centerx, self.rect().centery]
-    if self.exploding <= -10:
+      self.size = (100,100)
+      self.pos[0] = pos[0] + self.size[0]
+    elif self.exploding  == -5:
+      rect = self.rect()
+      player = self.game.player
+      if rect.colliderect(player.rect()):
+        player.velocity[1] = -10
+        player.hit(self.dmg)
+    elif self.exploding <= -10:
       self.game.enemies.remove(self)
-
 
 class Goblin(Entity):
   def __init__(self, game, pos, size, speed = 3):
@@ -391,7 +389,6 @@ class Goblin(Entity):
         self.attacking = 10
         player.hit(self.dmg)
 
-
 class Slime(Entity):
   def __init__(self, game, pos, size, speed = 3):
     super().__init__(game, 'slime', pos, size, 100, 10, speed)  ,
@@ -422,5 +419,3 @@ class Slime(Entity):
       self.set_action('run')
     else: 
       self.set_action('idle')
-
-
