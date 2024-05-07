@@ -134,7 +134,8 @@ class Entity:
 
   def render(self, surf, offset = (0, 0)):
     asset = pygame.transform.flip(self.animation.img(), self.flip, False)
-    surf.blit(asset, (self.pos[0] - offset[0] + self.animation_offset[0], self.pos[1] - offset[1] + self.animation_offset[1] ))
+    surf.blit(asset, (self.pos[0] - offset[0] + self.animation_offset[0], self.pos[1] - offset[1] + self.animation_offset[1]))
+
 
   def hit(self, dmg):
     self.pos[0] += -30 if not self.flip else 30
@@ -149,6 +150,7 @@ class Player(Entity):
     self.doublejumps_cd = 0
     self.flashing = 0
     self.spawn = 30
+
 
   def update(self, tilemap, enemies, movement=(0, 0)):
     super().update(tilemap=tilemap, movement=movement)
@@ -173,9 +175,8 @@ class Player(Entity):
     if self.spawn > 0:
       self.spawn -= 1
       self.set_action('spawn')
-    # elif self.hp <= 0:
-    #   self.set_action('death')
-    #   self.game.over -= 1
+    elif self.hp <= 0:
+      self.set_action('death')
     elif self.air_time > 1 and self.jumps == 0 and self.velocity[1] < 5:
       self.set_action('jump_double')
     elif self.air_time > 1 and self.velocity[1] < 0:
@@ -198,7 +199,7 @@ class Player(Entity):
     if self.flashing < 0:
       self.flashing = min(0, self.flashing + 1)
     if abs(self.flashing) > 50:
-      self.velocity[0] = abs(self.flashing) / self.flashing * 8
+      self.velocity[0] = abs(self.flashing) / self.flashing * self.speed
       if abs(self.flashing) == 51:
         self.velocity[0] *= 0.1
       
@@ -298,11 +299,11 @@ class Bomb(Entity):
     super().__init__(game, 'bomb', pos, (50,50), 1, 30)  
     self.des_pos = d_pos
     self.flying = False
-    self.exploding = 30
+    self.exploding = 10
 
   def update(self, tilemap, movement = (0,0)):
     if not self.flying:
-      self.velocity = [(self.des_pos[0] - self.pos[0])/self.size[0],-15]
+      self.velocity = [(self.des_pos[0] - self.pos[0])/self.size[0], -15]
       self.flying = True
 
     if self.collision['bottom']:

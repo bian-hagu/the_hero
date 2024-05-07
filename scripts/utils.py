@@ -37,3 +37,6 @@ class Animation:
 
   def img(self):
     return self.imgs[int(self.frame / self.duration)]
+  
+
+  

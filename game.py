@@ -3,6 +3,7 @@ import pygame
 from scripts.utils import *
 from scripts.entities import *
 from scripts.tilemap import Tilemap
+from scripts.UI import *
 class Game:
   def __init__(self):
     pygame.init()
@@ -17,6 +18,7 @@ class Game:
       'grass': load_imgs('tiles/grass'), 
       'grass_new': load_imgs('tiles/grass_new'),
       'spawners': load_imgs('tiles/spawners'),
+      'life': load_img('hub/life.png'),
       'background': load_img('background/background.png', (1280,720)),
       'background1': load_img('background/bg.png', (1280,720)),
       'hud_health': load_img('hub/hud_health.png', (300, 100)),
@@ -53,8 +55,13 @@ class Game:
       'slime/death': Animation(load_imgs('entities/slime/slime_death'), duration=4),
 
     }
+
+    self.is_pause = False
+    self.label = ''
+  
+
+
     self.player = Player(self, (50, 500), (50, 50))
-    self.over = 4
     self.tilemap = Tilemap(self, size=50)
     self.load_level(0)
 
@@ -93,58 +100,23 @@ class Game:
     self.scroll = [0,0]
     self.particles = []
 
-  def draw_hub(self, surf, offset = (0,0)):
+  def draw_hub(self, offset = (0,0)):
+    self.display.blit(self.assets['life'], (37,35))
     hp_percent = self.player.hp/100
-    dj_precent = (60 - self.player.doublejumps_cd)/60
-
+    hp_percent = 0 if hp_percent < 0 else hp_percent
     if hp_percent < 0.25:
-      pygame.draw.rect(surf, 'red', (110, 25, 190*hp_percent, 32), 0, 8)
+      pygame.draw.rect(self.display, 'red', (110, 25, 190*hp_percent, 32), 0, 8)
     else:
-      pygame.draw.rect(surf, 'green', (110, 25, 190*hp_percent, 32), 0, 8)
-    surf.blit(self.assets['hud_health'], (10,10))
-    
+      pygame.draw.rect(self.display, 'green', (110, 25, 190*hp_percent, 32), 0, 8)
+    self.display.blit(self.assets['hud_health'], (10,10))
+   
+    dj_percent = (60 - self.player.doublejumps_cd)/60
     cooldown_pos = (self.player.pos[0] - offset[0], self.player.pos[1] - offset[1] - 20)
-    pygame.draw.rect(surf, 'white', (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_precent, 7), 0, 4)
-    surf.blit(self.assets['cooldown'], cooldown_pos)
-
+    pygame.draw.rect(self.display, 'white', (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_percent, 7), 0, 4)
+    self.display.blit(self.assets['cooldown'], cooldown_pos)
 
   def run(self):    
     while True:
-      # if self.over <= 0 or self.player.pos[1] > 1000:
-      #   print('Game over')
-      #   pygame.quit()
-      #   sys.exit() 
-      self.display.blit(self.assets['background'], (0,0))
-
-      if self.player.pos[0] > self.display.get_width()/2:
-        self.scroll[0] += (self.player.rect().centerx - self.display.get_width()/2 - self.scroll[0])
-      if self.player.pos[1] < 300:
-        self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])
-      if self.player.pos[1] > 600:
-        self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])   
-      
-      render_scroll = ((self.scroll[0], (self.scroll[1])))
-
-
-      self.tilemap.render(self.display, offset=render_scroll)
-
-      for enemy in self.enemies.copy(): 
-        if enemy.hp <= 0:
-          self.enemies.remove(enemy)
-        enemy.update(self.tilemap, (0,0))
-        enemy.render(self.display, offset=render_scroll)
-
-      self.player.update(tilemap=self.tilemap, enemies=self.enemies, movement=(self.movement[1] - self.movement[0], 0))
-      self.player.render(self.display, offset=render_scroll)    
-      
-
-      for particle in self.particles.copy():
-        kill = particle.update()
-        particle.render(self.display, offset=render_scroll)
-        if kill:
-          self.particles.remove(particle)
-
-      keys = pygame.key.get_pressed()
       for event in pygame.event.get():  
         if event.type == pygame.QUIT:
           pygame.quit() 
@@ -153,29 +125,76 @@ class Game:
           if event.key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
-          if event.key == pygame.K_SPACE:
-            self.player.jump()
-          if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-            self.player.flash()
-          if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-            self.movement[0] = True
-          if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-            self.movement[1] = True 
+          if event.key == pygame.K_1:
+            if self.is_pause:
+              self.is_pause = False
+            else:
+              self.is_pause = True
 
-        if event.type == pygame.KEYUP:
-          if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-            self.movement[0] = False
-          if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-            self.movement[1] = False
+      if not self.is_pause:
+        self.display.blit(self.assets['background'], (0,0))
+
+        if self.player.pos[0] > self.display.get_width()/2:
+          self.scroll[0] += (self.player.rect().centerx - self.display.get_width()/2 - self.scroll[0])
+        if self.player.pos[1] < 300:
+          self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])
+        if self.player.pos[1] > 600:
+          self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])   
         
-        if event.type == pygame.MOUSEBUTTONDOWN:
-          if event.button == 1:
-            self.player.attack(self.enemies, self.display, render_scroll)
+        render_scroll = ((self.scroll[0], (self.scroll[1])))
 
-      self.draw_hub(self.display, offset=render_scroll)
+
+        self.tilemap.render(self.display, offset=render_scroll)
+
+        for enemy in self.enemies.copy(): 
+          if enemy.hp <= 0:
+            self.enemies.remove(enemy)
+          enemy.update(self.tilemap, (0,0))
+          enemy.render(self.display, offset=render_scroll)
+
+        self.player.update(tilemap=self.tilemap, enemies=self.enemies, movement=(self.movement[1] - self.movement[0], 0))
+        self.player.render(self.display, offset=render_scroll)    
+        
+
+        for particle in self.particles.copy():
+          kill = particle.update()
+          particle.render(self.display, offset=render_scroll)
+          if kill:
+            self.particles.remove(particle)
+
+        for event in pygame.event.get():
+          if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+              self.player.jump()
+            if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+              self.player.flash()
+            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+              self.movement[0] = True
+            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+              self.movement[1] = True 
+
+          if event.type == pygame.KEYUP:
+            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+              self.movement[0] = False
+            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+              self.movement[1] = False
+          
+          if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+              self.player.attack(self.enemies, self.display, render_scroll)
+
+        self.draw_hub( offset=render_scroll)
+
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
+      
+      if self.is_pause:
+        label = UI(self.screen).pause((300, 400))
+        if label == 'QUIT':
+          pygame.quit()
+          sys.exit()
+        elif label == 'RESUME':
+          self.is_pause = False
       pygame.display.update()
       self.clock.tick(60)
-
 
 Game().run()
