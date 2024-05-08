@@ -7,10 +7,12 @@ from scripts.UI import *
 class Game:
   def __init__(self):
     pygame.init()
-
     pygame.display.set_caption("The Hero")
+    
+    pygame.display.set_icon(pygame.image.load("data/imgs/hub/life.png"))
     self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
     self.clock = pygame.time.Clock()
+    self.label = ''
 
   def load_level(self, map_id):
     self.assets = {
@@ -61,9 +63,7 @@ class Game:
     self.scroll = [0,0]
     self.movement = [False, False]
     
-
     self.is_pause = False
-    self.label = ''
 
     try:
       self.tilemap.load('data/maps/map' + str(map_id) + '.json')
@@ -78,22 +78,11 @@ class Game:
       if spawner['variant'] == 0:
         self.player.pos = spawner['pos']
         self.player.air_time = 0
-      elif spawner['variant'] == 1:  
-        self.enemies.append(Enemy(self, 'blue_fly', spawner['pos'], (50,50)))
       elif spawner['variant'] == 2:  
         self.enemies.append(Bomber(self, spawner['pos'], (50,50)))
       elif spawner['variant'] == 3:  
         self.enemies.append(Goblin(self, spawner['pos'], (50,50)))
-      elif spawner['variant'] == 4:  
-        self.enemies.append(Enemy(self, 'mushroom', spawner['pos'], (50,50)))
-      elif spawner['variant'] == 5:  
-        self.enemies.append(Enemy(self, 'orange_fly', spawner['pos'], (50,50)))
-      elif spawner['variant'] == 6:  
-        self.enemies.append(Enemy(self, 'rabit',spawner['pos'], (50,50)))
-      elif spawner['variant'] == 7:  
         self.enemies.append(Slime(self, spawner['pos'], (50,50)))
-      elif spawner['variant'] == 8:  
-        self.enemies.append(Enemy(self, 'worm',spawner['pos'], (50,50)))
       else: 
         print('unkown enemy')
   
@@ -112,11 +101,13 @@ class Game:
     pygame.draw.rect(self.display, 'white', (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_percent, 7), 0, 4)
     self.display.blit(self.assets['cooldown'], cooldown_pos)
 
-  def load_game(self):
-    pass
   def run(self, id_map):    
     self.load_level(id_map)
+    self.labels = ['RESUME', 'MAIN MENU', 'QUIT']
+    ui = UI(self.screen)
+
     while True:
+      self.label = ''
       for event in pygame.event.get():  
         if event.type == pygame.QUIT:
           pygame.quit() 
@@ -131,6 +122,25 @@ class Game:
             else:
               self.is_pause = True
 
+          if event.key == pygame.K_SPACE:
+            self.player.jump()
+          if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+            self.player.flash()
+          if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+            self.movement[0] = True
+          if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+            self.movement[1] = True 
+
+        if event.type == pygame.KEYUP:
+          if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+            self.movement[0] = False
+          if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+            self.movement[1] = False
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+          if event.button == 1:
+            self.player.attack(self.enemies, self.display, render_scroll)
+      
       if not self.is_pause:
         self.display.blit(self.assets['background'], (0,0))
 
@@ -142,8 +152,6 @@ class Game:
           self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])   
         
         render_scroll = ((self.scroll[0], (self.scroll[1])))
-
-
         self.tilemap.render(self.display, offset=render_scroll)
 
         for enemy in self.enemies.copy(): 
@@ -153,48 +161,35 @@ class Game:
           enemy.render(self.display, offset=render_scroll)
 
         self.player.update(tilemap=self.tilemap, enemies=self.enemies, movement=(self.movement[1] - self.movement[0], 0))
-        self.player.render(self.display, offset=render_scroll)    
-        
-
-        for event in pygame.event.get():
-          if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-              self.player.jump()
-            if event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
-              self.player.flash()
-            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-              self.movement[0] = True
-            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-              self.movement[1] = True 
-
-          if event.type == pygame.KEYUP:
-            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-              self.movement[0] = False
-            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-              self.movement[1] = False
-          
-          if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
-              self.player.attack(self.enemies, self.display, render_scroll)
-
+        self.player.render(self.display, offset=render_scroll)          
         self.draw_hub( offset=render_scroll)
-
-      self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       
+      self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       if self.is_pause:
-        label = UI(self.screen).pause((300, 400))
-        if label == 'QUIT':
-          pygame.quit()
-          sys.exit()
-        elif label == 'RESUME':
-          self.is_pause = False
+        self.label = ui.pause((300, 400), self.labels)
+
       pygame.display.update()
       self.clock.tick(60)
 
+      if self.label == 'QUIT':
+        pygame.quit()
+        sys.exit()
+      elif self.label == 'RESUME':
+        self.is_pause = False
+      elif self.label == 'MAIN MENU':
+        break
+
+    self.main_menu()
+
   def main_menu(self):
+    text_size = (100, 100)
     self.assets = {
       'background': load_img('background/background.png', (1280, 720)),
-
+      't': load_img('text/t.png', text_size),
+      'h': load_img('text/h.png', text_size),
+      'e': load_img('text/e.png', text_size),
+      'r': load_img('text/r.png', text_size),
+      'o': load_img('text/o.png', text_size),
     }
     self.display = pygame.Surface((1280, 720))
 
@@ -208,12 +203,10 @@ class Game:
     description = description_font.render('@Made by Hagu Bian', True, (200,200,200,10))
     descriptionRect = description.get_rect()
     descriptionRect.bottomright = (1250, 720)
-
-
+    self.labels = ['CONTINUE', 'NEW GAME', 'SELECT LEVEL', 'QUIT']
+    ui = UI(self.display)
     while True:
-      self.display.blit(self.assets['background'], (0, 0))
-      self.display.blit(gameName_text, textRect)
-      self.display.blit(description, descriptionRect)
+      self.label = ''
       for event in pygame.event.get():
         if event.type == pygame.QUIT:
           pygame.quit()
@@ -222,44 +215,45 @@ class Game:
           if event.key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
-      label = UI(self.display).main_menu()
+      self.display.blit(self.assets['background'], (0, 0))
+      self.display.blit(description, descriptionRect)
+      ui.game_name(self.assets)
+      self.label = ui.main_menu(self.labels)
 
-      if label == 'QUIT':
-        pygame.quit()
-        sys.exit()
-      elif label == 'SELECT LEVEL':
-        return 'SELECT LEVEL'
-      elif label == 'NEW GAME':
-        return 'NEW GAME'
-      if label == 'CONTINUE':
-        return 'CONTINUE'
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
-      self.clock.tick(30)
-  
+      self.clock.tick(60)
+
+      if self.label == 'QUIT':
+        pygame.quit()
+        sys.exit()
+      elif self.label in self.labels:
+        break 
+      
+    if self.label == 'SELECT LEVEL':
+      self.select_level()
+    elif self.label == 'NEW GAME':
+      self.run(0)
+
   def select_level(self):
+    text_size = (100, 100)
     self.assets = {
       'background': load_img('background/background.png', (1280, 720)),
-
-    }
+      't': load_img('text/t.png', text_size),
+      'h': load_img('text/h.png', text_size),
+      'e': load_img('text/e.png', text_size),
+      'r': load_img('text/r.png', text_size),
+      'o': load_img('text/o.png', text_size),
+      }
     self.display = pygame.Surface((1280, 720))
-
-    # font = pygame.font.Font('data/font/Pixellari.ttf', 128)
-    # gameName_text = font.render('THE HERO', True, (40,40,40))
-    # textRect = gameName_text.get_rect()
-    # textRect.centerx = 1280//2
-    # textRect.top = 50
-
-    # description_font = pygame.font.Font('data/font/Pixellari.ttf', 24)
-    # description = description_font.render('@Made by Hagu Bian', True, (200,200,200,10))
-    # descriptionRect = description.get_rect()
-    # descriptionRect.bottomright = (1250, 720)
-
-
+    description_font = pygame.font.Font('data/font/Pixellari.ttf', 24)
+    description = description_font.render('@Made by Hagu Bian', False, (200,200,200,10))
+    descriptionRect = description.get_rect()
+    descriptionRect.bottomright = (1250, 720)
+    self.labels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Back']
+    ui = UI(self.display)
     while True:
-      self.display.blit(self.assets['background'], (0, 0))
-      # self.display.blit(gameName_text, textRect)
-      # self.display.blit(description, descriptionRect)
+      self.label = ''
       for event in pygame.event.get():
         if event.type == pygame.QUIT:
           pygame.quit()
@@ -268,29 +262,33 @@ class Game:
           if event.key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
-      label = UI(self.display).select_level()
 
-      if label == 'QUIT':
-        pygame.quit()
-        sys.exit()
-      elif label == 'SELECT LEVEL':
-        return 'SELECT LEVEL'
-      elif label == 'NEW GAME':
-        return 'NEW GAME'
-      if label == 'CONTINUE':
-        return 'CONTINUE'
+      self.display.blit(self.assets['background'], (0, 0))
+      self.display.blit(description, descriptionRect)
+      ui.game_name(self.assets)
+      self.label = ui.select_level(self.labels)
+
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
       self.clock.tick(30)
 
+      if self.label in self.labels:
+        break 
 
+    if self.label == 'Back':
+      self.main_menu()
+    elif self.label == 'Level 1':
+      self.run(0)
+    elif self.label == 'Level 2':
+      self.run(0)
+    elif self.label == 'Level 3':
+      self.run(0)
+    elif self.label == 'Level 4':
+      self.run(0)
+    elif self.label == 'Level 5':
+      self.run(0)
 
 if __name__ == '__main__':
   game = Game()
-  label = game.main_menu()
-  if label == 'SELECT LEVEL':
-    pass
-  elif label == 'NEW GAME':
-    game.run(0)
-  elif label == 'CONTINUE':
-    pass
+  # game.run(0)
+  game.select_level()
