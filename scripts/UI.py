@@ -1,17 +1,32 @@
 import pygame
 
-
-
-
-
 class Button:
   def __init__(self, surf, pos, size, text=''):
+    """
+    Initialize a Button object.
+
+    Parameters:
+    surf (pygame.Surface): The surface on which the button will be drawn.
+    pos (tuple): The position of the top-left corner of the button on the surface.
+    size (tuple): The size of the button as (width, height).
+    text (str, optional): The text to be displayed on the button. Default is an empty string.
+
+    Returns:
+    None
+    """
     self.surf = surf
     self.pos = pos
     self.size = size
     self.text = text
 
   def draw(self):
+    """
+    Draws the button on the surface.
+
+    The button is drawn with a black border, a lighter shade of green, 
+    a darker shade of green, and a darker shade of brown. The text on the button is rendered 
+    using the 'data/font/Pixellari.ttf' font with a size of 32 and white color.
+    """
     pygame.draw.rect(self.surf, 'black',         (self.pos[0], self.pos[1], self.size[0], self.size[1]))
     pygame.draw.rect(self.surf, (224, 236, 23),  (self.pos[0] + 3, self.pos[1] + 3, self.size[0]-6, self.size[1]-6))
     pygame.draw.rect(self.surf, 'black',         (self.pos[0] + 8, self.pos[1] + 8, self.size[0]-16, self.size[1]-16))
@@ -24,10 +39,30 @@ class Button:
     self.surf.blit(text, textRect)
  
   def rect(self):
+    """
+    Returns the rectangular coordinates of the button.
+
+    The rectangular coordinates are represented as a tuple (x, y, width, height),
+    where (x, y) is the position of the top-left corner of the button,
+    and (width, height) is the size of the button.
+
+    Returns:
+    tuple: A tuple representing the rectangular coordinates of the button.
+    """
     return (self.pos[0], self.pos[1], self.size[0], self.size[1])
 
 class Menu:
   def __init__(self, surf, pos, size, labels, collumns = 1):
+    """
+    Initialize a Menu object.
+
+    Parameters:
+    surf (pygame.Surface): The surface on which the menu will be drawn.
+    pos (tuple): The position of the top-left corner of the menu on the surface.
+    size (tuple): The size of the menu as (width, height).
+    labels (list): A list of strings representing the labels for the buttons in the menu.
+    collumns (int, optional): The number of columns in the menu. Default is 1.
+    """
     self.surf= surf
     self.pos = pos
     self.size = size
@@ -70,11 +105,28 @@ class Menu:
         if i+1 < self.num_buttons:
           self.buttons.append(Button(self.surf, (button_pos[0] + offset[0], button_pos[1]), button_size, self.labels[i+1]))
         button_pos = [button_pos[0], button_pos[1] + offset[1]]
+  
   def draw(self):
+    """
+    Draws the menu on the surface.
+
+    The menu is drawn with a background color, and each button is drawn using the Button class.
+    """
     for button in self.buttons:
       button.draw() 
 
   def is_click(self, x=0, y=0):
+    """
+    Checks if a button in the menu is clicked.
+
+    Parameters:
+    ----------
+    x (int, optional): The x-coordinate offset for the mouse position. Default is 0.
+    y (int, optional): The y-coordinate offset for the mouse position. Default is 0.
+
+    Returns:
+    str: The label of the clicked button, or None if no button is clicked.
+    """
     mpos = pygame.mouse.get_pos()
     rect = pygame.Rect(mpos[0]-x, mpos[1]-y, 1, 1)
     for event in pygame.event.get():
@@ -87,9 +139,36 @@ class Menu:
 
 class UI(Menu):
   def __init__(self, surf):
+    """
+    Initialize a UI object.
+
+    Parameters:
+    ----------
+    surf (pygame.Surface): The surface on which the UI will be drawn.
+    """
     self.surf = surf
 
   def pause(self, size, labels):
+    """
+    Displays a pause menu on the screen.
+
+    Parameters:
+    ----------
+    size : tuple
+        The size of the pause menu as (width, height).
+    labels : list
+        A list of strings representing the labels for the buttons in the pause menu.
+
+    Returns:
+    ----------
+    str
+        The label of the clicked button, or None if no button is clicked.
+
+    Note:
+    This method creates an overlay surface, draws a menu surface on top of the overlay,
+    and then blits the menu surface onto the main surface. It also handles mouse clicks
+    to determine which button is clicked.
+    """
     width, height = self.surf.get_width(), self.surf.get_height()
     overlay = pygame.Surface((width, height))
     overlay.set_alpha(128)
@@ -104,6 +183,26 @@ class UI(Menu):
     return label
   
   def retry(self, size, labels):
+    """
+    Displays a retry menu on the screen.
+
+    Parameters:
+    ----------
+    size : tuple
+        The size of the retry menu as (width, height).
+    labels : list
+        A list of strings representing the labels for the buttons in the retry menu.
+
+    Returns:
+    ----------
+    str
+        The label of the clicked button, or None if no button is clicked.
+
+    Note:
+    This method creates an overlay surface, draws a menu surface on top of the overlay,
+    and then blits the menu surface onto the main surface. It also handles mouse clicks
+    to determine which button is clicked.
+    """
     width, height = self.surf.get_width(), self.surf.get_height()
     overlay = pygame.Surface((width, height))
     overlay.set_alpha(128)
@@ -118,6 +217,23 @@ class UI(Menu):
     return label
 
   def main_menu(self, labels):
+    """
+    Displays the main menu on the screen.
+
+    Parameters:
+    ----------
+    labels : list
+        A list of strings representing the labels for the buttons in the main menu.
+
+    Returns:
+    ----------
+    str
+        The label of the clicked button, or None if no button is clicked.
+
+    Note:
+    This method creates a Menu object with the given parameters, draws the menu on the surface,
+    and then handles mouse clicks to determine which button is clicked.
+    """
     width, height = self.surf.get_width(), self.surf.get_height()
 
     menu = Menu(self.surf, (width//3, 200), (width//3, height//1.5), labels)
@@ -125,6 +241,24 @@ class UI(Menu):
     return menu.is_click()
 
   def select_level(self, labels):
+    """
+    Displays a menu for selecting levels.
+
+    Parameters:
+    ----------
+    labels : list
+        A list of strings representing the labels for the level buttons.
+
+    Returns:
+    ----------
+    str
+        The label of the clicked level button, or None if no button is clicked.
+
+    Note:
+    This method creates a Menu object with the given parameters, draws the menu on the surface,
+    and then handles mouse clicks to determine which level button is clicked.
+    The menu is positioned at (320, 200) with a size of (640, height//1.5) and displays the labels in 2 columns.
+    """
     width, height = self.surf.get_width(), self.surf.get_height()
     menu = Menu(self.surf, 
                 pos=  (320, 200), 
@@ -135,6 +269,24 @@ class UI(Menu):
     return menu.is_click()
 
   def game_name(self, assets):
+    """
+    Draws the game name "the hero" on the surface using the provided assets.
+
+    Parameters:
+    ----------
+    assets : dict
+        A dictionary containing the game's character assets. The keys are the characters,
+        and the values are the corresponding pygame.Surface objects.
+
+    Returns:
+    ----------
+    None
+
+    Note:
+    This method iterates through each character in the game name, checks if it's not a space,
+    and blits the corresponding asset onto the surface at the specified position.
+    The position is updated after each character is drawn, with a fixed offset of 110 pixels.
+    """
     text = 'the hero'
     pos = [200, 50]
     for char in text:

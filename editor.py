@@ -5,8 +5,29 @@ from scripts.tilemap import Tilemap
 class Editor:
   def __init__(self):
     """
-    Initialize the game engine.
+    Initialize the Editor class.
 
+    Parameters:
+    ----------
+    screen: The main display surface.
+    display: The surface used for rendering.
+    clock: The clock object for managing the game's frame rate.
+    assets: A dictionary containing the tile images.
+    movement: A list to store the movement states (left, right, up, down).
+    tilemap: The Tilemap object for managing the game's tilemap.
+    scroll: A list to store the scrolling position.
+    tile_list: A list of tile types.
+    tile_group: The index of the current tile group.
+    tile_variant: The index of the current tile variant.
+    shift: A boolean indicating whether the shift key is pressed.
+    clicking: A boolean indicating whether the left mouse button is clicked.
+    right_clicking: A boolean indicating whether the right mouse button is clicked.
+    ongrid: A boolean indicating whether the tiles are placed on a grid.
+    map: The current map ID.
+
+    Methods:
+    ----------
+    load_level: Load a level from a JSON file.
     """
     pygame.init()
 
@@ -15,8 +36,6 @@ class Editor:
     self.display = pygame.Surface((1280, 720))
 
     self.clock = pygame.time.Clock()
-
-
     self.assets = {
       'grass': load_imgs('tiles/grass'),
       'cave': load_imgs('tiles/cave'),
@@ -46,13 +65,23 @@ class Editor:
     self.load_level(self.map) # replce 0 to n map
 
   def load_level(self, map_id):
+    """
+    Load a level from a JSON file.
+
+    Parameters:
+    ----------
+    map_id: The ID of the map to load.
+    """
     try:
       self.tilemap.load('data/maps/map' + str(map_id) + '.json')
     except:
       print('Error loading map')
       pass
 
-  def run(self):  
+  def run(self): 
+    """
+    Run the editor.
+    """
     while True:
       self.tilemap.save(f'data/maps/map{self.map}.json')
       self.display.fill('black')
@@ -89,10 +118,6 @@ class Editor:
           tile_r = pygame.Rect(tile['pos'][0] - self.scroll[0], tile['pos'][1] - self.scroll[1], tile_img.get_width(), tile_img.get_height())
           if tile_r.collidepoint(mpos):
             self.tilemap.offgrid.remove(tile)
-
-
-
-
 
       # Render current tile in left-top corner 
       self.display.blit(current_tile_img, (5,5))
@@ -176,6 +201,5 @@ class Editor:
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
       self.clock.tick(60)
-
-
+      
 Editor().run()

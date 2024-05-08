@@ -9,6 +9,10 @@ from scripts.UI import *
 
 class Game:
   def __init__(self):
+    """
+    Initializes a new Game object.
+  
+    """
     pygame.init()
     pygame.display.set_caption("The Hero")
     
@@ -19,6 +23,13 @@ class Game:
     self.maps = {'1': True, '2': False, '3': False, '4': False, '5': False}
 
   def load_level(self, map_id):
+    """
+    Loads a level from a file.
+
+    Parameters
+    ----------
+    map_id : int or string
+    """
     self.assets = { 
       'grass': load_imgs('tiles/grass'), 
       'grass_new': load_imgs('tiles/grass_new'),
@@ -73,7 +84,6 @@ class Game:
       'coin': pygame.mixer.Sound('data/sfx/coin.wav'),
       'end': pygame.mixer.Sound('data/sfx/end.wav'),
       'grass': pygame.mixer.Sound('data/sfx/grass_1.wav'),
-
     }
     self.sfx['jump'].set_volume(0.5)
     self.sfx['explosion'].set_volume(0.05)
@@ -83,8 +93,6 @@ class Game:
     self.sfx['coin'].set_volume(0.8)
     self.sfx['end'].set_volume(0.5)
     self.sfx['grass'].set_volume(0.1)
-
-
 
     self.display = pygame.Surface((1280, 720))
     self.player = Player(self, (50, 500), (50, 50))
@@ -120,6 +128,13 @@ class Game:
         print('unkown enemy')    
   
   def draw_hub(self, font, offset = (0,0)):
+    """ 
+    Draw a hub 
+
+    Parameters
+    ----------
+
+    """
     self.display.blit(self.assets['life'], (37,35))
     hp_percent = self.player.hp/100
     hp_percent = 0 if hp_percent < 0 else hp_percent
@@ -139,7 +154,15 @@ class Game:
     pygame.draw.rect(self.display, 'white', (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_percent, 7), 0, 4)
     self.display.blit(self.assets['cooldown'], cooldown_pos)
 
-  def run(self, id_map):    
+  def run(self, id_map):
+    """ 
+    Run the game
+    
+    Parameters
+    ----------
+    id_map : int or string
+
+    """    
     self.load_level(id_map)
     self.labels1 = ['RESUME', 'RETRY', 'MAIN MENU', 'QUIT']
     self.labels2 = ['RETRY', 'MAIN MENU', 'QUIT']
@@ -235,6 +258,12 @@ class Game:
       self.run(self.map_id)
 
   def main_menu(self):
+    """ 
+    Run the main menu
+    
+    Parameters
+    ----------
+    """
     text_size = (100, 100)
     self.assets = {
       'background': load_img('background/background.png', (1280, 720)),
@@ -287,8 +316,12 @@ class Game:
       self.select_level()
     elif self.label == 'NEW GAME':
       self.run(0)
+      
 
   def select_level(self):
+    """
+    Run the select level menu.
+    """
     text_size = (100, 100)
     self.assets = {
       'background': load_img('background/background.png', (1280, 720)),
@@ -298,6 +331,7 @@ class Game:
       'r': load_img('text/r.png', text_size),
       'o': load_img('text/o.png', text_size),
       }
+    
     self.display = pygame.Surface((1280, 720))
     description_font = pygame.font.Font('data/font/Pixellari.ttf', 24)
     description = description_font.render('@Made by Hagu Bian', False, (200,200,200,10))
@@ -351,11 +385,9 @@ class Game:
     
 
   def load(self):
+    """
+    Load the save game.
+    """
     f = open('data/save_game/save.json', 'r')
     map_data = json.load(f)
     f.close()
-
-if __name__ == '__main__':
-  game = Game()
-  game.run(0)
-  # game.main_menu()
