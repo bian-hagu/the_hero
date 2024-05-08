@@ -230,7 +230,7 @@ class Player(Entity):
       self.air_time = 0
       self.doublejumps_cd  -= 1 if self.doublejumps_cd > 0 else 0
 
-    if self.hp <= 0:
+    if self.hp <= 0 or self.pos[1] >= 1000:
       self.dead -= 1
 
     if self.spawn > 0:
@@ -239,7 +239,6 @@ class Player(Entity):
       self.set_action('spawn')
     elif self.hp <= 0:
       self.game.sfx['end'].play(0)
-
       self.set_action('death')
     elif self.air_time > 1 and self.jumps == 0 and self.velocity[1] < 5:
       self.set_action('jump_double')
