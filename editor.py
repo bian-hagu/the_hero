@@ -144,7 +144,6 @@ class Editor:
             self.shift = True
           if event.key == pygame.K_RETURN:  
             self.tilemap.save(f'data/maps/map{self.map}.json')
-            print('Map saved')
           if event.key == pygame.K_a or event.key == pygame.K_LEFT:
             self.movement[0] = True
           if event.key == pygame.K_d or event.key == pygame.K_RIGHT:

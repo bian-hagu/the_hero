@@ -102,6 +102,20 @@ class UI(Menu):
     self.surf.blit(menu_surf, (width/2 - size[0]/2, height/2 - size[1]/2))
     label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2)
     return label
+  
+  def retry(self, size, labels):
+    width, height = self.surf.get_width(), self.surf.get_height()
+    overlay = pygame.Surface((width, height))
+    overlay.set_alpha(128)
+    overlay.fill('black')
+    self.surf.blit(overlay, (0, 0))
+ 
+    menu_surf = pygame.Surface(size)
+    menu = Menu(menu_surf, (0,0), size, labels)
+    menu.draw()
+    self.surf.blit(menu_surf, (width/2 - size[0]/2, height/2 - size[1]/2))
+    label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2)
+    return label
 
   def main_menu(self, labels):
     width, height = self.surf.get_width(), self.surf.get_height()
@@ -110,11 +124,10 @@ class UI(Menu):
     menu.draw()
     return menu.is_click()
 
-
   def select_level(self, labels):
     width, height = self.surf.get_width(), self.surf.get_height()
     menu = Menu(self.surf, 
-                pos = (320, 200), 
+                pos=  (320, 200), 
                 size= (640, height//1.5), 
                 labels= labels, 
                 collumns= 2)

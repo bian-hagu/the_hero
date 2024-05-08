@@ -23,7 +23,7 @@ class Tilemap:
     self.game = game
     self.size = size
     self.tilemap = {}
-    self.offgrid = []
+    self.offgrid = {}
   
   def extract(self, id_pairs, keep=False):
     matches = []
