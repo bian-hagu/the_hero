@@ -10,7 +10,7 @@ from scripts.UI import *
 class Game:
   def __init__(self):
     """
-    Initializes a new Game object.
+    Initializes a NEW GAME(demo) object.
   
     """
     pygame.init()
@@ -21,6 +21,8 @@ class Game:
     self.clock = pygame.time.Clock()
     self.label = ''
     self.maps = {'1': True, '2': False, '3': False, '4': False, '5': False}
+    self.complete_level = False
+    self.complete_level = False
 
   def load_level(self, map_id):
     """
@@ -34,6 +36,13 @@ class Game:
       'grass': load_imgs('tiles/grass'), 
       'grass_new': load_imgs('tiles/grass_new'),
       'spawners': load_imgs('tiles/spawners'),
+      'dungeon': load_imgs('tiles/dungeon'),
+      'cave': load_imgs('tiles/cave'),
+      'sign': load_imgs('tiles/sign'),
+      'slab': load_imgs('tiles/slab'),
+      'objects': load_imgs('objects'),
+
+
       'life': load_img('hub/life.png'),
       'background': load_img('background/background.png', (1280,720)),
       'background1': load_img('background/bg.png', (1280,720)),
@@ -102,6 +111,7 @@ class Game:
     self.map_id = map_id
     self.is_pause = False
     self.is_retry = False
+    self.complete_level = False
     self.offset = [0, 0]
 
     try:
@@ -151,7 +161,7 @@ class Game:
 
     dj_percent = (60 - self.player.doublejumps_cd)/60
     cooldown_pos = (self.player.pos[0] - offset[0], self.player.pos[1] - offset[1] - 20)
-    pygame.draw.rect(self.display, 'white', (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_percent, 7), 0, 4)
+    pygame.draw.rect(self.display, (150,150,250), (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * dj_percent, 7), 0, 4)
     self.display.blit(self.assets['cooldown'], cooldown_pos)
 
   def run(self, id_map):
@@ -166,6 +176,7 @@ class Game:
     self.load_level(id_map)
     self.labels1 = ['RESUME', 'RETRY', 'MAIN MENU', 'QUIT']
     self.labels2 = ['RETRY', 'MAIN MENU', 'QUIT']
+    self.labels3 = ['NEXT LEVEL', 'MAIN MENU', 'QUIT']
     ui = UI(self.screen)
     font = pygame.font.Font('data/font/Pixellari.ttf', 36)
 
@@ -237,9 +248,15 @@ class Game:
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       if self.is_pause:
         if self.is_retry:
-          self.label = ui.retry((300,400), self.labels2)
+          self.label = ui.retry((320,400), self.labels2)
+        elif self.complete_level:
+          self.label = ui.complete((320, 400), self.labels3)
         else:
           self.label = ui.pause((320, 460), self.labels1)
+
+      if self.complete_level:
+        self.is_pause = True
+
 
       pygame.display.update()
       self.clock.tick(60)
@@ -256,6 +273,10 @@ class Game:
       self.main_menu()
     elif self.label == 'RETRY':
       self.run(self.map_id)
+    elif self.label == 'NEXT LEVEL':
+      pass
+
+    
 
   def main_menu(self):
     """ 
@@ -285,7 +306,7 @@ class Game:
     description = description_font.render('@Made by Hagu Bian', True, (200,200,200,10))
     descriptionRect = description.get_rect()
     descriptionRect.bottomright = (1250, 720)
-    self.labels = ['CONTINUE', 'NEW GAME', 'SELECT LEVEL', 'QUIT']
+    self.labels = ['CONTINUE(soon)', 'NEW GAME(demo)', 'SELECT LEVEL', 'QUIT']
     ui = UI(self.display)
     while True:
       self.label = ''
@@ -313,10 +334,14 @@ class Game:
         break 
       
     if self.label == 'SELECT LEVEL':
-      self.select_level()
-    elif self.label == 'NEW GAME':
+      self.select_level() 
+    elif self.label == 'NEW GAME(demo)':
+      # self.maps = {'1': True, '2': False, '3': False, '4': False, '5': False}
+      # self.player.coin = 0
       self.run(0)
-      
+    # elif self.label == 'CONTINUE(soon)':
+    #   self.load_game()
+
 
   def select_level(self):
     """
@@ -337,7 +362,7 @@ class Game:
     description = description_font.render('@Made by Hagu Bian', False, (200,200,200,10))
     descriptionRect = description.get_rect()
     descriptionRect.bottomright = (1250, 720)
-    self.labels = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Back']
+    self.labels = ['Level 1', 'Level 2', 'Level 3', 'Level 4(soon)', 'Level 5(soon)', 'Back']
     ui = UI(self.display)
     while True:
       self.label = ''
@@ -365,29 +390,37 @@ class Game:
     if self.label == 'Back':
       self.main_menu()
     elif self.label == 'Level 1':
-      self.run(0)
+      self.run(1)
     elif self.label == 'Level 2':
-      self.run(0)
+      self.run(2)
     elif self.label == 'Level 3':
-      self.run(0)
-    elif self.label == 'Level 4':
-      self.run(0)
-    elif self.label == 'Level 5':
-      self.run(0)
-  def save(self):
-    f = open('data/save_game/save.json', 'w')
-    save = {
-      'maps': self.maps
-    } 
-    json.dump(save, f)
-    f.close()
+      self.run(3)
+    elif self.label == 'Level 4(soon)':
+      self.run(4)
+    elif self.label == 'Level 5(soon)':
+      self.run(5)
+
+  # def save_game(self):
+  #   """
+  #   Save the game.
+  #   """
+  #   f = open('data/save_game/save.json', 'w')
+  #   save = {
+  #     'maps': self.maps,
+  #     "coin": self.player.coin,
+      
+  #   } 
+  #   json.dump(save, f)
+  #   f.close()
     
     
 
-  def load(self):
-    """
-    Load the save game.
-    """
-    f = open('data/save_game/save.json', 'r')
-    map_data = json.load(f)
-    f.close()
+  # def load_game(self):
+  #   """
+  #   Load the save game.
+  #   """
+  #   f = open('data/save_game/save.json', 'r')
+  #   save = json.load(f)
+  #   self.maps = save['maps']
+  #   self.player.coin = save['coin']
+  #   f.close()

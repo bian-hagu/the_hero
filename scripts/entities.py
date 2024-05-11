@@ -194,7 +194,7 @@ class Player(Entity):
     attack(self, enemies, surf, offset): Makes the player attack.
   """
   def __init__(self, game, pos, size):
-    super().__init__(game, 'player', pos, size, 100, 2500, 5)
+    super().__init__(game, 'player', pos, size, 100, 25, 5)
     self.air_time = 0
     self.jumps = 1
     self.doublejumps_cd = 0
@@ -627,6 +627,7 @@ class Goblin(Entity):
         self.walking = max(0, self.walking -1)
       elif random.random() < 0.01:
         self.walking = random.randint(30, 120)
+        
     if self.hp <= 0:
       if self.dead == 30:
         self.game.enemies.append(Coin(self.game, self.pos, (30, 30), self.coin))
@@ -690,7 +691,7 @@ class Slime(Entity):
       Updates the slime enemy.
   """
 
-  def __init__(self, game, pos, size, speed = 3, ):
+  def __init__(self, game, pos, size):
     """
     Initializes the slime enemy.
 
@@ -706,7 +707,15 @@ class Slime(Entity):
         The speed of the slime. Default is 3.
     """
     
-    super().__init__(game, 'slime', pos, size, 100, 10, speed, coin = 20)
+    super().__init__(game=game,
+                     type='slime', 
+                     pos=pos, 
+                     size=size, 
+                     hp = 100, 
+                     dmg = 3, 
+                     speed=8,
+                     attack_speed=0,
+                     coin = 20)
 
     self.walking = 0
     self.flip = True
@@ -723,7 +732,8 @@ class Slime(Entity):
     movement : tuple
         The movement vector of the slime enemy.
     """
-    if self.walking and self.dead <= 0:
+
+    if self.walking:
       if tilemap.solid_check((self.rect().centerx + (-24 if self.flip else 24), self.pos[1] + 50)):
         if (self.collision['right'] or self.collision['left']):
           self.flip = not self.flip
@@ -732,11 +742,9 @@ class Slime(Entity):
       else:
         self.flip = not self.flip
       self.walking = max(0, self.walking -1)
-      self.velocity[1] = 20
-
     elif random.random() < 0.01:
       self.walking = random.randint(30, 120)
-
+        
     if self.hp <= 0:
       if self.dead == 30:
         self.game.enemies.append(Coin(self.game, self.pos, (30, 30), self.coin))
@@ -792,6 +800,7 @@ class SavePoint(Entity):
     """
     super().__init__(game, 'save', pos, size, 1)
     self.time = 0
+
   def update(self, tilemap, movement=(0, 0)):
     """
     Updates the save point entity.
@@ -815,9 +824,11 @@ class SavePoint(Entity):
     p_rect = self.game.player.rect()
     if p_rect.colliderect(self.rect()):
       self.set_action('save')
+      self.game.player.coin += 100
       self.game.maps[self.game.map_id] = True
       self.game.sfx['spawn'].play()
-      self.game.save()
+      self.game.complete_level = True
+      # self.game.save_game()
     
     super().update(tilemap, movement)
   

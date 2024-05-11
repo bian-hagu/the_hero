@@ -2,6 +2,7 @@ import pygame
 import os
 BASE_IMG_PATH = 'data/imgs/'
 DEFFAULT_SIZE = (50,50)
+
 def load_img(path, size=DEFFAULT_SIZE):
   """
   Load and resize an image from the specified path, and set the colorkey to black.

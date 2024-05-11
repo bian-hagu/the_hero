@@ -137,7 +137,7 @@ class Editor:
               self.tilemap.offgrid.append({
                 'type': self.tile_list[self.tile_group], 
                 'variant': self.tile_variant, 
-                'pos': (tilepos[0] * self.tilemap.size, tilepos[1] * self.tilemap.size)
+                'pos': (tilepos[0] * self.tilemap.size+render_scroll[0], tilepos[1] * self.tilemap.size + render_scroll[1])
               })
                 
           if event.button == 3:
@@ -196,7 +196,7 @@ class Editor:
       
       # Key for jump function
       if keys[pygame.K_SPACE] and self.player.collision['bottom']:
-        self.player.velocity[1] = -20 #height of jump = 4 blocks
+        self.player.velocity[1] = -20 #height of jump = 3 blocks
 
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
