@@ -39,6 +39,7 @@ class Entity:
       action (str): The current action of the entity.
       animation (Animation): The current animation of the entity.
     """
+
     self.game = game
     self.type = type
     self.pos = list(pos)
@@ -194,7 +195,7 @@ class Player(Entity):
     attack(self, enemies, surf, offset): Makes the player attack.
   """
   def __init__(self, game, pos, size):
-    super().__init__(game, 'player', pos, size, 100, 25, 5)
+    super().__init__(game, 'player', pos, size, 100, 25, 15, attack_speed=30)
     self.air_time = 0
     self.jumps = 1
     self.doublejumps_cd = 0
@@ -230,7 +231,7 @@ class Player(Entity):
       self.air_time = 0
       self.doublejumps_cd  -= 1 if self.doublejumps_cd > 0 else 0
 
-    if self.hp <= 0 or self.pos[1] >= 1000:
+    if self.hp <= 0 or self.pos[1] >= 800:
       self.dead -= 1
 
     if self.spawn > 0:
@@ -275,7 +276,7 @@ class Player(Entity):
   def jump(self):
     if self.jumps == 2:
       self.game.sfx['jump'].play()
-      self.velocity[1] -= 15
+      self.velocity[1] -= 25
       self.jumps -= 1
     elif self.jumps == 1 and self.doublejumps_cd <= 0:   
       self.velocity[1] -= 15
@@ -571,20 +572,6 @@ class Goblin(Entity):
   """
 
   def __init__(self, game, pos, size, speed = 3):
-    """
-    Initializes the goblin enemy.
-
-    Parameters:
-    -----------
-    game : Game
-        The game instance.
-    pos : tuple
-        The position of the goblin.
-    size : tuple
-        The size of the goblin.
-    speed : int
-        The speed of the goblin. Default is 3.
-    """
     super().__init__(game, 'goblin', pos, size, 150, 20, speed, coin = 75)  
 
     self.walking = 0
@@ -643,6 +630,8 @@ class Goblin(Entity):
       self.set_action('hit')
     elif movement[0] != 0:
       self.set_action('run')
+    elif self.attacking > 0:
+      self.set_action('attack')
     else: 
       self.set_action('idle')
     
@@ -743,7 +732,7 @@ class Slime(Entity):
         self.flip = not self.flip
       self.walking = max(0, self.walking -1)
     elif random.random() < 0.01:
-      self.walking = random.randint(30, 120)
+      self.walking = random.randint(20, 60)
         
     if self.hp <= 0:
       if self.dead == 30:
@@ -824,11 +813,9 @@ class SavePoint(Entity):
     p_rect = self.game.player.rect()
     if p_rect.colliderect(self.rect()):
       self.set_action('save')
-      self.game.player.coin += 100
-      self.game.maps[self.game.map_id] = True
+      self.game.coin += 100
       self.game.sfx['spawn'].play()
       self.game.complete_level = True
-      # self.game.save_game()
     
     super().update(tilemap, movement)
   
@@ -855,29 +842,133 @@ class Coin(Entity):
       Updates the coin entity.
   """
   def __init__(self, game, pos, size, coin):
-    """
-    Initializes the coin entity.
 
-    Parameters:
-    -----------
-    game : Game
-        The game instance.
-    pos : tuple
-        The position of the coin.
-    size : tuple
-        The size of the coin.
-    coin : int
-        The coin value of the coin.
-    """
     super().__init__(game, 'coin', pos, size, coin=coin)
     self.pickup = 10
+    if random.randint(1, 10) <= 3: #30%
+      self.game.enemies.append(Orb(game=self.game, 
+                               pos=(self.pos[0] + 10, self.pos[1]),
+                               size=self.size,
+                               hp=random.randint(1, 50)))
+
   def update(self, tilemap, movement=(0, 0)):
     p_rect = self.game.player.rect()
     if p_rect.colliderect(self.rect()):
       self.pickup -= 1
       self.set_action('pickup')
       if self.pickup <= 0:
+        self.game.coin += self.coin
         self.game.player.coin += self.coin
         self.game.sfx['coin'].play()
         self.game.enemies.remove(self)
     super().update(tilemap, movement=movement)
+
+class Orb(Entity):
+  def __init__(self, game, pos, size, hp):
+    super().__init__(game, type='orb', pos=pos, size=size, hp=hp)
+    self.pickup = 10
+
+  def update(self, tilemap, movement=(0, 0)):
+    p_rect = self.game.player.rect()
+    if p_rect.colliderect(self.rect()):
+      self.pickup -= 1
+      self.set_action('pickup')
+      if self.pickup <= 0:
+        hp_loss = 100 - self.game.player.hp
+        self.game.player.hp += self.hp if hp_loss > self.hp else hp_loss 
+        self.game.sfx['coin'].play()
+        self.game.enemies.remove(self)
+    super().update(tilemap, movement=movement)
+
+class Waterfall(Entity):
+  def __init__(self, game, pos, size):
+    super().__init__(game=game, type='waterfall', pos=pos, size=size)
+
+  def update(self, tilemap, movement=(0, 0)):
+    self.animation.update()
+
+class Spike(Entity):
+  def __init__(self, game, pos, size):
+    super().__init__(game, type='spike', pos=pos, size=size, dmg=20, attack_speed=120)
+
+  def update(self, tilemap, movement=(0, 0)):
+    """
+    Updates the spike trap entity.
+
+    Parameters:
+    -----------
+    tilemap : Tilemap
+        The tilemap on which the spike trap entity moves.
+    movement : tuple, optional
+        The movement vector of the spike trap entity. Default is (0, 0).
+
+    Side Effects:
+    -------------
+    - Updates the attack cooldown and attacking counters.
+    - Checks if the player is within the spike trap's range.
+    - Calls the attack method if the player is within range.
+    - Updates the animation of the spike trap.
+    - Sets the action of the spike trap based on the attacking counter.
+    """
+    self.attack_cd -= 1
+    self.attacking -= 1
+    player = self.game.player
+    if self.pos[0] + self.size[0] >= player.pos[0]\
+      and self.pos[0] - self.size[0] <= player.pos[0] and self.pos[1] + 100 <= player.pos[1]:
+      self.attack(player)
+    self.animation.update()
+    if self.attacking > 0:
+      self.set_action('attack')
+    else:
+      self.set_action('idle')
+
+  def attack(self, player):
+    """
+    Makes the spike trap attack the player.
+
+    Parameters:
+    -----------
+    player : Player
+        The player instance to attack.
+    """
+    if self.attack_cd < 0:
+      self.attack_cd = self.attack_speed
+      self.velocity = [0,0]
+      self.attacking = 60
+
+      rect = pygame.Rect(self.pos[0] - self.size[0]/2, self.pos[1] , self.size[0] * 2, self.size[1])
+      p_rect = player.rect()
+      if rect.colliderect(p_rect):
+        self.velocity = [0,0]
+        player.hit(self.dmg)
+
+class Spike_fall(Entity):
+  def __init__(self, game, pos, size):
+    super().__init__(game, type='spike_fall', pos=pos, size=size, dmg=5, attack_speed=120)
+    self.falling = False
+
+  def update(self, tilemap, movement=(0, 0)):
+
+    self.attack_cd -= 1
+    self.attacking -= 1
+    player = self.game.player
+    self.fall(player)
+
+    if self.pos[0] + 50 >= player.pos[0]\
+      and self.pos[0] - 50 <= player.pos[0]:
+      self.falling = True
+      self.set_action('attack')
+    if self.falling:
+      super().update(tilemap, movement)
+
+
+  def fall(self, player):
+    if self.falling:
+      rect = pygame.Rect(self.pos[0] - self.size[0]/2, self.pos[1] , self.size[0] * 2, self.size[1])
+      p_rect = player.rect()
+      if rect.colliderect(p_rect):
+        self.velocity = [0,0]
+        player.hit(self.dmg)
+        self.game.enemies.remove(self)
+      elif self.collision['bottom']:
+        self.game.enemies.remove(self)

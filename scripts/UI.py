@@ -36,6 +36,7 @@ class Button:
     textRect = text.get_rect()
     textRect.center = (self.pos[0] + self.size[0]//2, self.pos[1] + self.size[1]//2 + 3)
     self.surf.blit(text, textRect)
+    self.button_rect = self.rect()
  
   def rect(self):
     """
@@ -124,9 +125,8 @@ class Menu:
     rect = pygame.Rect(mpos[0]-x, mpos[1]-y, 1, 1)
     for event in pygame.event.get():
       if event.type == pygame.MOUSEBUTTONDOWN:
-        # if event.button == 1:
         for button in self.buttons:
-          if rect.colliderect(button.rect()):
+          if rect.colliderect(button.button_rect):
             return button.text
           
 

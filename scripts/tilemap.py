@@ -24,12 +24,7 @@ class Tilemap:
     tilemap (dict): A dictionary to store the tile data for the tilemap.
     offgrid (dict): A dictionary to store the offgrid tile data.
     """
-
-    Parameters
-    ----------
-      game (Game): The game instance this tilemap belongs to.
-      size (int, optional): The size of each tile in pixels. Defaults to 50.
-    """
+    
     self.game = game
     self.size = size
     self.tilemap = {}

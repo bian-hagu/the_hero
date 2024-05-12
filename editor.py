@@ -44,7 +44,7 @@ class Editor:
       'slab': load_imgs('tiles/slab'),
       'objects': load_imgs('objects'),
       'grass_new': load_imgs('tiles/grass_new'),
-      'spawners': load_imgs('tiles/spawners'),      
+      'spawners': load_imgs('tiles/spawners'),    
     }
     self.movement = [False, False, False, False]
 
@@ -55,18 +55,18 @@ class Editor:
     self.tile_list = list(self.assets)
     self.tile_group = 0
     self.tile_variant = 0
-    self.shift = False
+    self.shift = False  
     self.clicking = False
     self.right_clicking = False
     self.ongrid = True
 
-    self.map = '0'
+    self.map = '3'
 
     self.load_level(self.map) # replce 0 to n map
 
   def load_level(self, map_id):
     """
-    Load a level from a JSON file.
+    Load a level from a JSON wq wqfile.
 
     Parameters:
     ----------
@@ -101,14 +101,12 @@ class Editor:
       else: 
         self.display.blit(current_tile_img, (tilepos[0] * self.tilemap.size, tilepos[1] * self.tilemap.size))
 
-      # print(render_scroll[0] //50)
       if self.clicking and self.ongrid:
         self.tilemap.tilemap[str(tilepos[0]+ render_scroll[0]//self.tilemap.size) + ';' + str(tilepos[1]+render_scroll[1]//self.tilemap.size)] = {
           'type': self.tile_list[self.tile_group], 
           'variant': self.tile_variant, 
           'pos': (tilepos[0] + render_scroll[0]//self.tilemap.size, tilepos[1] + render_scroll[1]//self.tilemap.size)}
         
-
       if self.right_clicking:
         tile_loc = str(str(tilepos[0]+ render_scroll[0]//self.tilemap.size) + ';' + str(tilepos[1]+render_scroll[1]//self.tilemap.size))
         if tile_loc in self.tilemap.tilemap:
