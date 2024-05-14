@@ -47,8 +47,8 @@ class Game:
       'objects': load_imgs('objects'),
 
       'potion': load_img('hub/potion.png', (30,30)),
-      'background': load_img('background/background.png', (1280,720)),
-      'background1': load_img('background/bg.png', (1280,720)),
+      'background1': load_img('background/background.png', (1280,720)),
+      'background2': load_img('background/bg.png', (1280,720)),
       'hud_health': load_img('hub/hud_health.png', (300, 100)),
       'cooldown': load_img('hub/cooldown.png', (50,15)),
       'coin': load_img('hub/coin.png', (30,30)),
@@ -232,10 +232,12 @@ class Game:
       self.label = ''
 
       if not self.is_pause:
-        if self.map_id != 3:
-          self.display.blit(self.assets['background'], (0,0))
-        else:
+        if self.map_id == 3:
           self.display.fill((0,0,0))
+        elif self.map_id == 4:
+          self.display.blit(self.assets['background2'], (0,0))
+        else:
+          self.display.blit(self.assets['background1'], (0,0))
 
         if self.player.pos[0] > self.display.get_width()/2:
           self.scroll[0] += (self.player.rect().centerx - self.display.get_width()/2 - self.scroll[0])

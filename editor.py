@@ -58,7 +58,7 @@ class Editor:
     self.clicking = False
     self.right_clicking = False
     self.ongrid = True
-    self.map = '3'
+    self.map = '4'
 
     self.load_level(self.map) # replce 0 to n map
 
