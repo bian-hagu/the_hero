@@ -62,6 +62,13 @@ class Editor:
 
     self.load_level(self.map) # replce 0 to n map
 
+=======
+
+    self.map = '0'
+
+    self.load_level(self.map) # replce 0 to n map
+
+>>>>>>> c514d4a987e5ffe3b80fbfbc752d5eb3055b8baf
   def load_level(self, map_id):
     """
     Load a level from a JSON file.
