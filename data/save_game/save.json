@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-{"maps": {"1": true, "2": true, "3": true, "4": false, "5": false}, "coin": 418, "potions": 22}
-=======
-{"maps": {"1": true, "2": false, "3": false, "4": false, "5": false, "0": true}}
->>>>>>> c514d4a987e5ffe3b80fbfbc752d5eb3055b8baf
+{"maps": {"1": true, "2": false, "3": false, "4": false, "5": false}, "coin": 0, "potions": 0}

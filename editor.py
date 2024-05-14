@@ -46,9 +46,7 @@ class Editor:
       'grass_new': load_imgs('tiles/grass_new'),
       'spawners': load_imgs('tiles/spawners'),   
       'boss': load_imgs('tiles/boss', (200,200)), 
-=======
-      'spawners': load_imgs('tiles/spawners'),      
->>>>>>> c514d4a987e5ffe3b80fbfbc752d5eb3055b8baf
+
     }
     self.movement = [False, False, False, False]
     self.tilemap = Tilemap(self, size=50)
