@@ -139,7 +139,7 @@ class Entity:
     asset = pygame.transform.flip(self.animation.img(), self.flip, False)
     surf.blit(asset, (self.pos[0] - offset[0] + self.animation_offset[0], self.pos[1] - offset[1] + self.animation_offset[1]))
     rect = self.rect()
-    pygame.draw.rect(surf, 'blue', (rect[0] - offset[0], rect[1]-offset[1], rect[2], rect[3]), 3)
+    pygame.draw.rect(surf, 'blue', (rect[0] - offset[0], rect[1] - offset[1], rect[2], rect[3]), 3)
  
   def hit(self, dmg, nock = 0):
     """
