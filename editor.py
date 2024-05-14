@@ -191,10 +191,7 @@ class Editor:
             self.movement[2] = False
           if event.key == pygame.K_s or event.key == pygame.K_DOWN:
             self.movement[3] = False
-      
-      # Key for jump function
-      if keys[pygame.K_SPACE] and self.player.collision['bottom']:
-        self.player.velocity[1] = -20 #height of jump = 3 blocks
+
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
       self.clock.tick(60)

@@ -1,8 +1,11 @@
 import sys
 import json
+import json
 import pygame
 
+
 from scripts.utils import *
+from scripts.entities import *
 from scripts.entities import *
 from scripts.tilemap import Tilemap
 from scripts.UI import *
@@ -16,6 +19,8 @@ class Game:
     """
     pygame.init()
     pygame.display.set_caption("The Hero")
+    
+    pygame.display.set_icon(pygame.image.load("data/imgs/hub/life.png"))
     
     pygame.display.set_icon(pygame.image.load("data/imgs/hub/life.png"))
     self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
@@ -141,6 +146,7 @@ class Game:
 
     try:
       self.tilemap.load('data/maps/map' + str(map_id) + '.json')
+      self.tilemap.load('data/maps/map' + str(map_id) + '.json')
     except:
       print('Error loading map')
       pass
@@ -261,6 +267,7 @@ class Game:
       for event in pygame.event.get():  
         if event.type == pygame.QUIT:
           pygame.quit() 
+          sys.exit()    
           sys.exit()    
         if event.type == pygame.KEYDOWN:
           if event.key == pygame.K_1:

@@ -33,14 +33,23 @@ class Entity:
     self.velocity = [0,0]
     self.hp = hp
     self.dmg = dmg
+    self.hp = hp
+    self.dmg = dmg
     self.speed = speed
+    self.coin = coin
+    self.attack_speed = attack_speed
     self.coin = coin
     self.attack_speed = attack_speed
     self.collision = {'top': False, 'bottom': False, 'left': False, 'right': False}
     self.animation_offset = (-3,-3)
     self.flip = False
     self.action = ''
+    self.action = ''
     self.set_action('idle')
+    self.hitting = 0  
+    self.attacking = 0
+    self.attack_cd = 0
+    self.dead = 30
     self.hitting = 0  
     self.attacking = 0
     self.attack_cd = 0
@@ -53,6 +62,9 @@ class Entity:
     Returns:
     ---------
         The rectangular bounding box of the entity as a pygame.Rect object.
+    Returns:
+    ---------
+        The rectangular bounding box of the entity as a pygame.Rect object.
     """
     return pygame.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
 
@@ -61,7 +73,9 @@ class Entity:
     Sets the action of the entity and updates the animation.
 
     Parameters:
+    Parameters:
     ----------
+    action (str): The new action of the entity.
     action (str): The new action of the entity.
     """
     if action != self.action:
@@ -118,6 +132,7 @@ class Entity:
         self.flip = False
       if movement[0] < 0:
         self.flip = True
+
 
     # Update velocity -------------------------------------------------------------------------
     self.velocity[1] = min(GRAVITY, self.velocity[1] + 1)
