@@ -195,7 +195,6 @@ class Editor:
       # Key for jump function
       if keys[pygame.K_SPACE] and self.player.collision['bottom']:
         self.player.velocity[1] = -20 #height of jump = 3 blocks
-      # print(tilepos[0] * self.tilemap.size+render_scroll[0], tilepos[1] * self.tilemap.size + render_scroll[1])
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
       self.clock.tick(60)
