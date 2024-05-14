@@ -64,7 +64,7 @@ class Editor:
 
   def load_level(self, map_id):
     """
-    Load a level from a JSON wq wqfile.
+    Load a level from a JSON file.
 
     Parameters:
     ----------
