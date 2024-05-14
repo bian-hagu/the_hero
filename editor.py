@@ -46,6 +46,9 @@ class Editor:
       'grass_new': load_imgs('tiles/grass_new'),
       'spawners': load_imgs('tiles/spawners'),   
       'boss': load_imgs('tiles/boss', (200,200)), 
+=======
+      'spawners': load_imgs('tiles/spawners'),      
+>>>>>>> c514d4a987e5ffe3b80fbfbc752d5eb3055b8baf
     }
     self.movement = [False, False, False, False]
     self.tilemap = Tilemap(self, size=50)
@@ -62,13 +65,6 @@ class Editor:
 
     self.load_level(self.map) # replce 0 to n map
 
-=======
-
-    self.map = '0'
-
-    self.load_level(self.map) # replce 0 to n map
-
->>>>>>> c514d4a987e5ffe3b80fbfbc752d5eb3055b8baf
   def load_level(self, map_id):
     """
     Load a level from a JSON file.
@@ -122,7 +118,6 @@ class Editor:
           pos = [tilepos[0]*50, tilepos[1]*50]
           if tile_r.collidepoint(pos):
             self.tilemap.offgrid.remove(tile)
-
 
       # Render current tile in left-top corner 
       self.display.blit(current_tile_img, (5,5))
@@ -202,7 +197,6 @@ class Editor:
       # Key for jump function
       if keys[pygame.K_SPACE] and self.player.collision['bottom']:
         self.player.velocity[1] = -20 #height of jump = 3 blocks
-      # print(tilepos[0] * self.tilemap.size+render_scroll[0], tilepos[1] * self.tilemap.size + render_scroll[1])
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()
       self.clock.tick(60)

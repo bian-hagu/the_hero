@@ -119,6 +119,7 @@ class Entity:
       if movement[0] < 0:
         self.flip = True
 
+
     # Update velocity -------------------------------------------------------------------------
     self.velocity[1] = min(GRAVITY, self.velocity[1] + 1)
     if self.collision['bottom'] or self.collision['top']:
@@ -196,7 +197,7 @@ class Player(Entity):
     self.flashing = 0
     self.spawn = 30
     self.dead = 60
-    self.potions = 0
+
 
   def update(self, tilemap, movement=(0, 0)):
     """
@@ -967,7 +968,6 @@ class Spike_fall(Entity):
       self.set_action('attack')
     if self.falling:
       super().update(tilemap, movement)
-
 
   def fall(self, player):
     if self.falling:

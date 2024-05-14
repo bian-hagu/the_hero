@@ -2,6 +2,18 @@ import pygame
 import json
 
 
+<<<<<<< HEAD
+=======
+
+NEIGHBOR_OFFSET = [ (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2),
+                    (-2, -2), (-2, -1), (-2, 0), (-2, 1), (-2, 2),
+                    (-1, -2), (-1, -1), (-1, 0), (-1, 1), (-1, 2),
+                    (0, -2), (0, -1), (0, 0), (0, 1), (0, 2),
+                    (1, -2), (1, -1), (1, 0), (1, 1), (1, 2),
+                    (2, -2), (2, -1), (2, 0),  (2, 1), (2, 2),
+                    (3, -2), (3, -1), (3, 0), (3, 1), (3, 2)]
+PHYSICS_TILES = {'grass', 'stone', 'grass_new', 'dungeon', 'slab'}
+>>>>>>> c514d4a987e5ffe3b80fbfbc752d5eb3055b8baf
 
 NEIGHBOR_OFFSET = [ (-4, -4), (-4, -3), (-4, -2), (-4, -1), (-4, 0), (-4, 1), (-4, 2), (-4, 3), (-4, 4),
                     (-3, -4), (-3, -3), (-3, -2), (-3, -1), (-3, 0), (-3, 1), (-3, 2), (-3, 3), (-3, 4),
@@ -18,6 +30,17 @@ class Tilemap:
   def __init__(self, game, size=50):
     """
     Initialize a new instance of the Tilemap class.
+<<<<<<< HEAD
+=======
+
+    Parameters:
+    ----------
+    game (Game): The game instance that the tilemap belongs to.
+    size (int): The size of each tile in the tilemap.
+    tilemap (dict): A dictionary to store the tile data for the tilemap.
+    offgrid (dict): A dictionary to store the offgrid tile data.
+    """
+>>>>>>> c514d4a987e5ffe3b80fbfbc752d5eb3055b8baf
 
     Parameters:
     ----------

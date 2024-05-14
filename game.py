@@ -189,7 +189,6 @@ class Game:
     potion_Rect.center = (62, 83)
     self.display.blit(potion_text, potion_Rect)
 
-
     hp_percent = self.player.hp/100
     hp_percent = 0 if hp_percent < 0 else hp_percent
     if hp_percent < 0.25:
@@ -199,7 +198,6 @@ class Game:
       pygame.draw.rect(self.display, 'green', (110, 25, 190*hp_percent, 32), 0, 8)
     self.display.blit(self.assets['hud_health'], (10,10))
     
-
     coin_text = FONT36.render(str(self.coin), True, 'yellow')
     coin_Rect = coin_text.get_rect()
     coin_Rect.topleft = (160, 65)
@@ -209,8 +207,6 @@ class Game:
     cooldown_pos = (self.player.pos[0] - offset[0], self.player.pos[1] - offset[1] - 20)
     pygame.draw.rect(self.display, (150,150,250), (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * mana_percent, 7), 0, 4)
     self.display.blit(self.assets['cooldown'], cooldown_pos)
-
-    
 
   def run(self, id_map):
     """ 
@@ -281,7 +277,6 @@ class Game:
           if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
             self.movement[1] = True 
           
-
         if event.type == pygame.KEYUP:
           if event.key == pygame.K_a or event.key == pygame.K_LEFT:
             self.movement[0] = False
@@ -376,7 +371,6 @@ class Game:
           if event.key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
-
       self.display.blit(self.assets['background'], (0, 0))
       self.display.blit(description, descriptionRect)
       ui.game_name(self.assets)
@@ -489,5 +483,3 @@ class Game:
       self.coin = 0
       self.maps = {'1': True, '2': False, '3': False, '4': False, '5': False}
       self.potions = 0
-
-# Game().run(0)
