@@ -44,29 +44,27 @@ class Editor:
       'slab': load_imgs('tiles/slab'),
       'objects': load_imgs('objects'),
       'grass_new': load_imgs('tiles/grass_new'),
-      'spawners': load_imgs('tiles/spawners'),      
+      'spawners': load_imgs('tiles/spawners'),   
+      'boss': load_imgs('tiles/boss', (200,200)), 
     }
     self.movement = [False, False, False, False]
-
     self.tilemap = Tilemap(self, size=50)
-
     self.scroll = [0,0]
 
     self.tile_list = list(self.assets)
     self.tile_group = 0
     self.tile_variant = 0
-    self.shift = False
+    self.shift = False  
     self.clicking = False
     self.right_clicking = False
     self.ongrid = True
-
-    self.map = '0'
+    self.map = '4'
 
     self.load_level(self.map) # replce 0 to n map
 
   def load_level(self, map_id):
     """
-    Load a level from a JSON file.
+    Load a level from a JSON wq wqfile.
 
     Parameters:
     ----------
@@ -101,23 +99,23 @@ class Editor:
       else: 
         self.display.blit(current_tile_img, (tilepos[0] * self.tilemap.size, tilepos[1] * self.tilemap.size))
 
-      # print(render_scroll[0] //50)
       if self.clicking and self.ongrid:
         self.tilemap.tilemap[str(tilepos[0]+ render_scroll[0]//self.tilemap.size) + ';' + str(tilepos[1]+render_scroll[1]//self.tilemap.size)] = {
           'type': self.tile_list[self.tile_group], 
           'variant': self.tile_variant, 
           'pos': (tilepos[0] + render_scroll[0]//self.tilemap.size, tilepos[1] + render_scroll[1]//self.tilemap.size)}
         
-
       if self.right_clicking:
         tile_loc = str(str(tilepos[0]+ render_scroll[0]//self.tilemap.size) + ';' + str(tilepos[1]+render_scroll[1]//self.tilemap.size))
         if tile_loc in self.tilemap.tilemap:
           del self.tilemap.tilemap[tile_loc]
-        for tile in self.tilemap.offgrid.copy():
+        for tile in self.tilemap.offgrid:
           tile_img = self.assets[tile['type']][tile['variant']]
-          tile_r = pygame.Rect(tile['pos'][0] - self.scroll[0], tile['pos'][1] - self.scroll[1], tile_img.get_width(), tile_img.get_height())
-          if tile_r.collidepoint(mpos):
+          tile_r = pygame.Rect(tile['pos'][0] - self.scroll[0]*self.tilemap.size, tile['pos'][1] - self.scroll[1]*self.tilemap.size, tile_img.get_width(), tile_img.get_height())
+          pos = [tilepos[0]*50, tilepos[1]*50]
+          if tile_r.collidepoint(pos):
             self.tilemap.offgrid.remove(tile)
+
 
       # Render current tile in left-top corner 
       self.display.blit(current_tile_img, (5,5))
@@ -193,10 +191,6 @@ class Editor:
             self.movement[2] = False
           if event.key == pygame.K_s or event.key == pygame.K_DOWN:
             self.movement[3] = False
-      
-      # Key for jump function
-      if keys[pygame.K_SPACE] and self.player.collision['bottom']:
-        self.player.velocity[1] = -20 #height of jump = 3 blocks
 
       self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
       pygame.display.update()

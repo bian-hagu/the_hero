@@ -30,12 +30,16 @@ class Button:
     pygame.draw.rect(self.surf, (224, 236, 23),  (self.pos[0] + 3, self.pos[1] + 3, self.size[0]-6, self.size[1]-6))
     pygame.draw.rect(self.surf, 'black',         (self.pos[0] + 8, self.pos[1] + 8, self.size[0]-16, self.size[1]-16))
     pygame.draw.rect(self.surf, (203, 81, 16),   (self.pos[0] + 11, self.pos[1] + 11, self.size[0]-22, self.size[1]-22))
+    if len(self.text) < 16:
+      font = pygame.font.Font('data/font/Pixellari.ttf', 32)
+    else:
+      font = pygame.font.Font('data/font/Pixellari.ttf', 24)
 
-    font = pygame.font.Font('data/font/Pixellari.ttf', 32)
     text = font.render(self.text, True, 'white')
     textRect = text.get_rect()
     textRect.center = (self.pos[0] + self.size[0]//2, self.pos[1] + self.size[1]//2 + 3)
     self.surf.blit(text, textRect)
+    self.button_rect = self.rect()
  
   def rect(self):
     """
@@ -124,9 +128,8 @@ class Menu:
     rect = pygame.Rect(mpos[0]-x, mpos[1]-y, 1, 1)
     for event in pygame.event.get():
       if event.type == pygame.MOUSEBUTTONDOWN:
-        # if event.button == 1:
         for button in self.buttons:
-          if rect.colliderect(button.rect()):
+          if rect.colliderect(button.button_rect):
             return button.text
           
 
@@ -314,6 +317,61 @@ class UI(Menu):
                 collumns= 2)
     menu.draw()
     return menu.is_click()
+  
+  def shop(self, size, game):
+    width, height = self.surf.get_width(), self.surf.get_height()
+    overlay = pygame.Surface((width, height))
+    overlay.set_alpha(128)
+    overlay.fill('black')
+    self.surf.blit(overlay, (0, 0))
+
+
+
+    menu_surf = pygame.Surface(size)
+    labels = ['Buy 1 potion\n(50 Coin)', 'Buy 5 potion\n(225 Coin)', 'Back']
+    menu = Menu(menu_surf, (0,0), size, labels)
+    menu.draw()
+    self.surf.blit(menu_surf, (width/2 - size[0]/2, height/2 - size[1]/2 + 75))
+    label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2 + 75)
+    
+    font64 = pygame.font.Font('data/font/Pixellari.ttf', 64)
+    text = font64.render('Shop', True, 'white')
+    textRect = text.get_rect()
+    textRect.center = (width/2, height/5)
+    self.surf.blit(text, textRect)
+    
+    if label == labels[0]:
+      if game.coin >= 50:
+        game.coin -= 50
+        game.potions += 1
+        game.save_game()
+    if label == labels[1]:
+      if game.coin >= 225:
+        game.coin -= 225
+        game.potions += 5
+        game.save_game()
+    Button(self.surf, ((150, height/2 - size[1]/2 + 75)), (size[0]*0.75, size[1]/3)).draw()
+    coin_pos = [170, 240]
+    potions_pos = [170, 300]
+    font32 = pygame.font.Font('data/font/Pixellari.ttf', 32)
+    coin_text = font32.render(str(game.coin), True, 'white')
+    coin_Rect = coin_text.get_rect()
+    coin_Rect.topleft = [210, coin_pos[1]]
+
+    potions_text = font32.render(str(game.potions), True, 'white')
+    potions_Rect = potions_text.get_rect()
+    potions_Rect.topleft = [210, potions_pos[1]]
+
+    self.surf.blit(potions_text, potions_Rect)
+    self.surf.blit(coin_text, coin_Rect)
+    self.surf.blit(game.assets['coin'], coin_pos)
+    self.surf.blit(game.assets['potion'], potions_pos)
+  
+
+    return label
+    
+  
+
 
   def game_name(self, assets):
     """
