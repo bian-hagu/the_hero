@@ -277,6 +277,10 @@ class Game:
         if event.type == pygame.MOUSEBUTTONDOWN:
           if event.button == 1:
             self.player.attack(self.enemies, self.display, self.offset)
+          if event.button == 2:
+            self.player.regen()
+          if event.button == 3:
+            self.player.flash()
       
       if self.player.dead <= 0:
         self.is_retry = True
