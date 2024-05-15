@@ -124,14 +124,14 @@ class Menu:
     Returns:
     str: The label of the clicked button, or None if no button is clicked.
     """
+    pygame.time.delay(75)
     mpos = pygame.mouse.get_pos()
     rect = pygame.Rect(mpos[0]-x, mpos[1]-y, 1, 1)
-    for event in pygame.event.get():
-      if event.type == pygame.MOUSEBUTTONDOWN:
-        for button in self.buttons:
-          if rect.colliderect(button.button_rect):
-            return button.text
-          
+    buttons = pygame.mouse.get_pressed()
+    if buttons[0]:
+      for button in self.buttons:
+        if rect.colliderect(button.button_rect):
+          return button.text
 
 class UI(Menu):
   def __init__(self, surf):

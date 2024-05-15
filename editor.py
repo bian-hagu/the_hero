@@ -58,13 +58,13 @@ class Editor:
     self.clicking = False
     self.right_clicking = False
     self.ongrid = True
-    self.map = '4'
+    self.map = '5'
 
     self.load_level(self.map) # replce 0 to n map
 
   def load_level(self, map_id):
     """
-    Load a level from a JSON wq wqfile.
+    Load a level from  JSON file.
 
     Parameters:
     ----------
