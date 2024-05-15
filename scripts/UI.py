@@ -124,12 +124,15 @@ class Menu:
     Returns:
     str: The label of the clicked button, or None if no button is clicked.
     """
+    width, height = pygame.display.get_surface().get_width(), pygame.display.get_surface().get_height()
     pygame.time.delay(75)
     mpos = pygame.mouse.get_pos()
-    rect = pygame.Rect(mpos[0]-x, mpos[1]-y, 1, 1)
+    scale = [1280/width, 720/height]
+    rect = pygame.Rect(mpos[0]*scale[0], mpos[1]*scale[1], 1, 1)
     buttons = pygame.mouse.get_pressed()
     if buttons[0]:
       for button in self.buttons:
+        print(rect, button.button_rect)
         if rect.colliderect(button.button_rect):
           return button.text
 
@@ -257,7 +260,6 @@ class UI(Menu):
     textRect = text.get_rect()
     textRect.center = (width/2, height/5)
 
-
     menu_surf = pygame.Surface(size)
     menu = Menu(menu_surf, (0,0), size, labels)
     menu.draw()
@@ -325,8 +327,6 @@ class UI(Menu):
     overlay.fill('black')
     self.surf.blit(overlay, (0, 0))
 
-
-
     menu_surf = pygame.Surface(size)
     labels = ['Buy 1 potion\n(50 Coin)', 'Buy 5 potion\n(225 Coin)', 'Back']
     menu = Menu(menu_surf, (0,0), size, labels)
@@ -367,12 +367,8 @@ class UI(Menu):
     self.surf.blit(game.assets['coin'], coin_pos)
     self.surf.blit(game.assets['potion'], potions_pos)
   
-
     return label
     
-  
-
-
   def game_name(self, assets):
     """
     Draws the game name "the hero" on the surface using the provided assets.
