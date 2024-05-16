@@ -112,7 +112,7 @@ class Menu:
     for button in self.buttons:
       button.draw() 
 
-  def is_click(self, x=0, y=0):
+  def is_click(self, x = 0, y = 0):
     """
     Checks if a button in the menu is clicked.
 
@@ -128,11 +128,12 @@ class Menu:
     pygame.time.delay(75)
     mpos = pygame.mouse.get_pos()
     scale = [1280/width, 720/height]
-    rect = pygame.Rect(mpos[0]*scale[0], mpos[1]*scale[1], 1, 1)
+    # rect = pygame.Rect(mpos[0]*scale[0], mpos[1]*scale[1], 1, 1)
+    rect = pygame.Rect((mpos[0]-x)*scale[0], (mpos[1]-y)*scale[1], 1, 1)
     buttons = pygame.mouse.get_pressed()
     if buttons[0]:
       for button in self.buttons:
-        print(rect, button.button_rect)
+        # print(button.button_rect, rect)
         if rect.colliderect(button.button_rect):
           return button.text
 
@@ -182,8 +183,9 @@ class UI(Menu):
     menu_surf = pygame.Surface(size)
     menu = Menu(menu_surf, (0,0), size, labels)
     menu.draw()
-    self.surf.blit(menu_surf, (width/2 - size[0]/2, height/2 - size[1]/2 + 75))
-    label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2 + 75)
+    pos = (width/2 - size[0]/2, height/2 - size[1]/2 + height/10)
+    self.surf.blit(menu_surf, pos)
+    label = menu.is_click(pos[0], pos[1])
     self.surf.blit(text, textRect)
 
     return label
@@ -222,8 +224,9 @@ class UI(Menu):
     menu_surf = pygame.Surface(size)
     menu = Menu(menu_surf, (0,0), size, labels)
     menu.draw()
-    self.surf.blit(menu_surf, (width/2 - size[0]/2, height/2 - size[1]/2 + 75))
-    label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2 + 75)
+    pos = (width/2 - size[0]/2, height/2 - size[1]/2 + height/10)
+    self.surf.blit(menu_surf, pos)
+    label = menu.is_click(pos[0], pos[1])
     self.surf.blit(text, textRect)
 
     return label
@@ -263,8 +266,9 @@ class UI(Menu):
     menu_surf = pygame.Surface(size)
     menu = Menu(menu_surf, (0,0), size, labels)
     menu.draw()
-    self.surf.blit(menu_surf, (width/2 - size[0]/2, height/2 - size[1]/2 + 75))
-    label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2 + 75)
+    pos = (width/2 - size[0]/2, height/2 - size[1]/2 + height/10)
+    self.surf.blit(menu_surf, pos)
+    label = menu.is_click(pos[0], pos[1])
     self.surf.blit(text, textRect)
     return label
 
@@ -331,8 +335,9 @@ class UI(Menu):
     labels = ['Buy 1 potion\n(50 Coin)', 'Buy 5 potion\n(225 Coin)', 'Back']
     menu = Menu(menu_surf, (0,0), size, labels)
     menu.draw()
-    self.surf.blit(menu_surf, (width/2 - size[0]/2, height/2 - size[1]/2 + 75))
-    label = menu.is_click(width/2 - size[0]/2, height/2 - size[1]/2 + 75)
+    pos = (width/2 - size[0]/2, height/2 - size[1]/2 + height/10)
+    self.surf.blit(menu_surf, pos)
+    label = menu.is_click(pos[0], pos[1])
     
     font64 = pygame.font.Font('data/font/Pixellari.ttf', 64)
     text = font64.render('Shop', True, 'white')
@@ -350,23 +355,25 @@ class UI(Menu):
         game.coin -= 225
         game.potions += 5
         game.save_game()
-    Button(self.surf, ((150, height/2 - size[1]/2 + 75)), (size[0]*0.75, size[1]/3)).draw()
-    coin_pos = [170, 240]
-    potions_pos = [170, 300]
+
+    sidepanel_pos = (pos[0]/4, pos[1])
+    sidepanel_size = (pos[0]/2, size[1]/2)
+    Button(self.surf, sidepanel_pos, sidepanel_size).draw()
+    coin_pos = [sidepanel_pos[0] * 1.2, sidepanel_pos[1] * 1.2]
+    potions_pos = [sidepanel_pos[0] * 1.2, sidepanel_pos[1] * 1.4]
     font32 = pygame.font.Font('data/font/Pixellari.ttf', 32)
     coin_text = font32.render(str(game.coin), True, 'white')
     coin_Rect = coin_text.get_rect()
-    coin_Rect.topleft = [210, coin_pos[1]]
+    coin_Rect.topleft = [coin_pos[0]*1.25, coin_pos[1]]
 
     potions_text = font32.render(str(game.potions), True, 'white')
     potions_Rect = potions_text.get_rect()
-    potions_Rect.topleft = [210, potions_pos[1]]
+    potions_Rect.topleft = [potions_pos[0]*1.25, potions_pos[1]]
 
     self.surf.blit(potions_text, potions_Rect)
     self.surf.blit(coin_text, coin_Rect)
     self.surf.blit(game.assets['coin'], coin_pos)
     self.surf.blit(game.assets['potion'], potions_pos)
-  
     return label
     
   def game_name(self, assets):

@@ -323,6 +323,7 @@ class Game:
       self.coin -= self.player.coin
       self.potions -= self.player.potions
       self.run(self.map_id)
+      print('a')
     elif self.label == 'NEXT LEVEL':
       self.run(self.map_id + 1)
      
