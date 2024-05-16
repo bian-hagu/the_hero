@@ -16,7 +16,8 @@ This is a 2D platform game developed using Pygame-CE for the "Python Programming
 * Movement: Use the A and D keys to move left and right.
 * Jump: Press the Space key to jump.
 * Attack: Press the left mouse button to attack.
-* Collect coins to increase your score.
+* Skill: Press the right mouse button to use the flash.
+* Collect coins to buy the posion in the store.
 * Objective: Defeat all enemies in each level to progress to the next one.
 
 **Requirements:**
