@@ -1,13 +1,10 @@
 import sys
 import json
-import json
 import pygame
 
-
+from scripts.tilemap import Tilemap
 from scripts.utils import *
 from scripts.entities import *
-from scripts.entities import *
-from scripts.tilemap import Tilemap
 from scripts.UI import *
 FPS = 60
 
@@ -19,9 +16,6 @@ class Game:
     """
     pygame.init()
     pygame.display.set_caption("The Hero")
-    
-    pygame.display.set_icon(pygame.image.load("data/imgs/hub/life.png"))
-    
     pygame.display.set_icon(pygame.image.load("data/imgs/hub/life.png"))
     self.screen = pygame.display.set_mode((1280, 720), pygame.RESIZABLE)
     self.clock = pygame.time.Clock()
@@ -31,7 +25,6 @@ class Game:
     pygame.mixer.music.set_volume(0.1)
     pygame.mixer.music.play(-1)
 
-
   def load_level(self, map_id):
     """
     Loads a level from a file.
@@ -40,7 +33,6 @@ class Game:
     ----------
     map_id : int or string
     """
-    
     self.assets = { 
       'grass': load_imgs('tiles/grass'), 
       'grass_new': load_imgs('tiles/grass_new'),
@@ -108,8 +100,6 @@ class Game:
       'minotaur/hit': Animation(load_imgs('entities/minotaur/minotaur_hit', (200,200)), duration=8),
       'minotaur/attack': Animation(load_imgs('entities/minotaur/minotaur_attack4', (200,200)), duration=4),
       'minotaur/death': Animation(load_imgs('entities/minotaur/minotaur_death', (200,200)), duration=62),
-
-      
     }
 
     self.sfx = {
@@ -124,7 +114,7 @@ class Game:
     }
     
     self.sfx['jump'].set_volume(0.5)
-    self.sfx['explosion'].set_volume(0.05)
+    self.sfx['explosion'].set_volume(0.025)
     self.sfx['sword'].set_volume(0.2)
     self.sfx['hit'].set_volume(0.5) 
     self.sfx['spawn'].set_volume(0.3)
@@ -195,7 +185,6 @@ class Game:
     potion_Rect.center = (62, 83)
     self.display.blit(potion_text, potion_Rect)
 
-
     hp_percent = self.player.hp/100
     hp_percent = 0 if hp_percent < 0 else hp_percent
     if hp_percent < 0.25:
@@ -205,7 +194,6 @@ class Game:
       pygame.draw.rect(self.display, 'green', (110, 25, 190*hp_percent, 32), 0, 8)
     self.display.blit(self.assets['hud_health'], (10,10))
     
-
     coin_text = FONT36.render(str(self.coin), True, 'yellow')
     coin_Rect = coin_text.get_rect()
     coin_Rect.topleft = (160, 65)
@@ -216,8 +204,6 @@ class Game:
     pygame.draw.rect(self.display, (150,150,250), (cooldown_pos[0]+ 2, cooldown_pos[1] + 4, 46 * mana_percent, 7), 0, 4)
     self.display.blit(self.assets['cooldown'], cooldown_pos)
 
-    
-
   def run(self, id_map):
     """ 
     Run the game
@@ -227,7 +213,6 @@ class Game:
     id_map : int or string
 
     """    
-
     self.load_level(id_map)
     self.labels1 = ['RESUME', 'RETRY', 'MAIN MENU', 'QUIT']
     self.labels2 = ['RETRY', 'MAIN MENU', 'QUIT']
@@ -245,13 +230,10 @@ class Game:
         else:
           self.display.blit(self.assets['background1'], (0,0))
 
+        # camera
         if self.player.pos[0] > self.display.get_width()/2:
           self.scroll[0] += (self.player.rect().centerx - self.display.get_width()/2 - self.scroll[0])
-        self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])
-        # if self.player.pos[1] < 400:
-        #   self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])
-        # if self.player.pos[1] > 600:
-        #   self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1])   
+        self.scroll[1] += (self.player.rect().centery - self.display.get_height()/2 - self.scroll[1]) - 150
         
         self.offset = ((self.scroll[0], (self.scroll[1])))
         self.tilemap.render(self.display, offset=self.offset)
@@ -268,11 +250,7 @@ class Game:
         if event.type == pygame.QUIT:
           pygame.quit() 
           sys.exit()    
-          sys.exit()    
         if event.type == pygame.KEYDOWN:
-          if event.key == pygame.K_1:
-            pygame.quit()
-            sys.exit()
           if event.key == pygame.K_ESCAPE:
             if self.is_pause:
               self.is_pause = False
@@ -290,7 +268,6 @@ class Game:
           if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
             self.movement[1] = True 
           
-
         if event.type == pygame.KEYUP:
           if event.key == pygame.K_a or event.key == pygame.K_LEFT:
             self.movement[0] = False
@@ -300,6 +277,10 @@ class Game:
         if event.type == pygame.MOUSEBUTTONDOWN:
           if event.button == 1:
             self.player.attack(self.enemies, self.display, self.offset)
+          if event.button == 2:
+            self.player.regen()
+          if event.button == 3:
+            self.player.flash()
       
       if self.player.dead <= 0:
         self.is_retry = True
@@ -340,11 +321,12 @@ class Game:
       self.main_menu()
     elif self.label == 'RETRY':
       self.coin -= self.player.coin
+      self.potions -= self.player.potions
       self.run(self.map_id)
+      print('a')
     elif self.label == 'NEXT LEVEL':
       self.run(self.map_id + 1)
      
-
   def main_menu(self):
     """ 
     Run the main menu
@@ -496,7 +478,5 @@ class Game:
       f.close()
     except:
       self.coin = 0
-      self.maps = {'1': True, '2': False, '3': False, '4': False, '5': False}
       self.potions = 0
-
-# Game().run(0)
+      self.maps = {'1': True, '2': False, '3': False, '4': False, '5': False}

@@ -230,7 +230,7 @@ class Player(Entity):
       self.air_time = 0
       self.mana += 1 if self.mana < 100 else 0
 
-    if self.hp <= 0 or self.pos[1] >= 800:
+    if self.hp <= 0 or self.pos[1] >= 1200:
       self.dead -= 1
 
     if self.spawn > 0:
@@ -873,6 +873,7 @@ class Coin(Entity):
                                hp=random.randint(1, 30)))
     if random.randint(1, 100) <= 10: # 10% chance add potion
       self.game.potions += 1
+      self.game.player.potions += 1
 
   def update(self, tilemap, movement=(0, 0)):
     p_rect = self.game.player.rect()
@@ -1090,7 +1091,12 @@ class Vase(Entity):
 
     if self.breaking  ==  20:
       if random.randint(1,10) <= 4: # 40% chance get poision
-        self.game.potions += 2 if random.randint(1,10) <= 2 else 1
+        if random.randint(1,10) <= 2:
+          potion = 2
+        else:
+          potion = 1
+        self.game.potions += potion
+        self.game.player.potions += potion
       if random.randint(1,10) <= 6: # 40% chance of spawning coin
         self.game.enemies.append(Coin(self.game, self.pos, (30,30), random.randint(10, 50)))
     
